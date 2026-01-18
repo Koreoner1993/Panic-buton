@@ -725,4 +725,77 @@ function panic() {
 
 // ---------- Boot ----------
 function boot() {
- 
+  setDemoMode(true);
+  setWalletUIConnected(false);
+  setPanicLevel(0);
+  setVaultUI();
+
+  // show cached radar immediately
+  const cache = pruneRadarCache(loadRadarCache());
+  saveRadarCache(cache);
+  renderRadar(sortRadar(readRadarItemsFromCache(cache)));
+
+  // cooldown slider
+  const slider = el("cooldown");
+  if (slider && exists("cooldownVal")) {
+    const v = Number(slider.value || 90);
+    state.cooldownSec = v;
+    setText("cooldownVal", String(v));
+
+    slider.addEventListener("input", (e) => {
+      state.cooldownSec = Number(e.target.value);
+      setText("cooldownVal", String(state.cooldownSec));
+
+      if (state.running) {
+        stopBot("cooldown changed — restarting");
+        startBot();
+      }
+    });
+  }
+
+  // wallet buttons
+  el("connectBtn")?.addEventListener("click", connectWallet);
+  el("connectBtn2")?.addEventListener("click", connectWallet);
+  el("disconnectBtn")?.addEventListener("click", disconnectWallet);
+
+  // demo button
+  el("demoBtn")?.addEventListener("click", () => setDemoMode(true));
+
+  // bot buttons
+  el("startBtn")?.addEventListener("click", startBot);
+  el("stopBtn")?.addEventListener("click", () => stopBot("Stopped by user"));
+
+  // panic
+  el("panicBtn")?.addEventListener("click", panic);
+
+  // vault buttons
+  el("depositBtn")?.addEventListener("click", depositUSDC);
+  el("withdrawBtn")?.addEventListener("click", withdrawUSDC);
+  el("maxDepositBtn")?.addEventListener("click", () => {
+    const rem = maxDepositRemaining();
+    setDepositInput(rem);
+    log(`VAULT — max remaining set to ${money(rem)}`, "hot");
+  });
+
+  // radar buttons (if present)
+  el("radarRefreshBtn")?.addEventListener("click", () => refreshRadar({ userTriggered: true }));
+  el("radarClearBtn")?.addEventListener("click", clearRadarCache);
+
+  // copy
+  enableCopyAddress();
+
+  // radar loop
+  startRadarLoop();
+
+  log("BOOT — system armed. Deposit up to $10, refresh Radar, then START.", "hot");
+
+  // eager connect
+  eagerConnectIfTrusted();
+}
+
+// ✅ GUARANTEED boot (fix)
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", boot);
+} else {
+  boot();
+}
