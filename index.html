@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Panic Button — Beta is Live</title>
 
-  <link rel="stylesheet" href="./css/style.css" />
   <meta name="theme-color" content="#000000" />
-
-  <!-- Favicon (uses your logo) -->
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
+
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
@@ -18,6 +17,7 @@
   <!-- TOP BAR -->
   <header class="topbar">
     <div class="topbar__inner">
+
       <div class="brand">
         <img
           src="./assets/panic-logo.png"
@@ -38,6 +38,7 @@
           Community
         </a>
       </nav>
+
     </div>
   </header>
 
@@ -45,12 +46,14 @@
 
     <!-- HERO -->
     <section class="hero">
+
+      <!-- LEFT -->
       <div class="hero__left">
         <h1 class="hero__h1">Panic Button</h1>
         <p class="hero__beta">Beta is live</p>
 
         <p class="hero__p">
-          One-page degen control panel.
+          One-page degen trading control panel.
           <span class="muted">Experimental. $1 micro-trades. Panic anytime.</span>
         </p>
 
@@ -67,14 +70,14 @@
         <p class="fineprint">
           Beta rules:
           <b>$10 max deposit</b>,
-          <b>$1 max per trade</b>,
+          <b>$1 per trade</b>,
           <b>one trade at a time</b>,
-          <b>auto-stop at +65%</b>.
+          <b>auto-stop +65%</b>.
           <span class="muted">No promises.</span>
         </p>
       </div>
 
-      <!-- RIGHT SIDE -->
+      <!-- RIGHT -->
       <div class="hero__right">
 
         <!-- BANNER -->
@@ -96,12 +99,7 @@
             <img
               src="./assets/panic-logo.png"
               alt="Panic Logo"
-              style="
-                width:64px;
-                height:64px;
-                border-radius:50%;
-                filter: drop-shadow(0 0 10px rgba(0,0,0,.8));
-              "
+              style="width:64px;height:64px;border-radius:50%;filter:drop-shadow(0 0 10px rgba(0,0,0,.8));"
             />
           </span>
 
@@ -117,29 +115,48 @@
     <!-- CONTROL GRID -->
     <section class="grid">
 
+      <!-- WALLET CARD -->
       <div class="card">
         <h2 class="card__title">Wallet</h2>
+
         <div class="row">
           <div class="kv">
             <div class="k">Address</div>
-            <div class="v mono" id="addrText">—</div>
+            <div
+              class="v mono walletAddr"
+              id="addrText"
+              title="Click to copy address"
+            >
+              —
+            </div>
           </div>
         </div>
-        <div class="row">
-          <button class="btn btn--primary" id="connectBtn2">Connect Wallet</button>
+
+        <div class="row btnRow">
+          <button class="btn btn--primary" id="connectBtn2">
+            Connect Wallet
+          </button>
+
+          <button class="btn btn--dim" id="disconnectBtn">
+            Disconnect
+          </button>
         </div>
-        <div class="row small muted">
-          USDC vault is separate. Token is vibes.
+
+        <div class="row small muted" id="networkStatus">
+          Network: —
         </div>
       </div>
 
+      <!-- AI BOT CARD -->
       <div class="card">
         <h2 class="card__title">AI Bot</h2>
 
         <div class="row">
           <div class="kv">
             <div class="k">Panic Level</div>
-            <div class="v"><span class="panicLevel" id="panicLevel">0</span></div>
+            <div class="v">
+              <span class="panicLevel" id="panicLevel">0</span>
+            </div>
           </div>
         </div>
 
@@ -159,6 +176,7 @@
         </div>
       </div>
 
+      <!-- LOGS CARD -->
       <div class="card">
         <h2 class="card__title">Live Bot Logs</h2>
         <div class="log" id="log"></div>
@@ -182,4 +200,3 @@
   <script src="./js/app.js"></script>
 </body>
 </html>
-
