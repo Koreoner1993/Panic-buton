@@ -92,7 +92,6 @@
 
         <!-- PANIC BUTTON -->
         <button class="panicBtn" id="panicBtn" aria-label="Panic button">
-
           <span class="panicBtn__ring" aria-hidden="true"></span>
 
           <span class="panicBtn__cap" aria-hidden="true">
@@ -115,39 +114,54 @@
     <!-- CONTROL GRID -->
     <section class="grid">
 
-      <!-- WALLET CARD (FIXED: copy + disconnect + network) -->
+      <!-- WALLET CARD -->
       <div class="card">
         <h2 class="card__title">Wallet</h2>
 
         <div class="row">
           <div class="kv">
             <div class="k">Address</div>
-            <div
-              class="v mono walletAddr"
-              id="addrText"
-              title="Click to copy address"
-            >
-              —
-            </div>
+            <div class="v mono walletAddr" id="addrText" title="Click to copy address">—</div>
           </div>
         </div>
 
         <div class="row btnRow">
-          <button class="btn btn--primary" id="connectBtn2">
-            Connect Wallet
-          </button>
-
-          <button class="btn btn--dim" id="disconnectBtn">
-            Disconnect
-          </button>
+          <button class="btn btn--primary" id="connectBtn2">Connect Wallet</button>
+          <button class="btn btn--dim" id="disconnectBtn">Disconnect</button>
         </div>
 
-        <div class="row small muted" id="networkStatus">
-          Network: —
+        <div class="row small muted" id="networkStatus">Network: —</div>
+        <div class="row small muted">Click address to copy.</div>
+      </div>
+
+      <!-- VAULT CARD (NEW) -->
+      <div class="card">
+        <h2 class="card__title">Vault (USDC)</h2>
+
+        <div class="row">
+          <div class="kv">
+            <div class="k">Vault Balance</div>
+            <div class="v"><span class="mono" id="vaultBalance">$0.00</span></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="label">Deposit (max $10)</label>
+          <div class="inputRow">
+            <span class="inputPrefix">$</span>
+            <input class="input" id="depositAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="1.00" />
+            <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
+          </div>
+          <div class="muted small">USDC on Solana. Beta UI only (no tx yet).</div>
+        </div>
+
+        <div class="row btnRow">
+          <button class="btn btn--primary" id="depositBtn">Deposit</button>
+          <button class="btn btn--dim" id="withdrawBtn">Withdraw</button>
         </div>
 
         <div class="row small muted">
-          Click address to copy.
+          Rules enforced: max deposit $10 · $1 trades · one trade
         </div>
       </div>
 
@@ -158,9 +172,7 @@
         <div class="row">
           <div class="kv">
             <div class="k">Panic Level</div>
-            <div class="v">
-              <span class="panicLevel" id="panicLevel">0</span>
-            </div>
+            <div class="v"><span class="panicLevel" id="panicLevel">0</span></div>
           </div>
         </div>
 
@@ -180,16 +192,16 @@
         </div>
       </div>
 
-      <!-- LOGS CARD -->
-      <div class="card">
-        <h2 class="card__title">Live Bot Logs</h2>
-        <div class="log" id="log"></div>
-        <div class="row logFooter">
-          <div class="muted small">Auto-stop target</div>
-          <div class="pill pill--red">+65%</div>
-        </div>
-      </div>
+    </section>
 
+    <!-- LOGS (FULL WIDTH BELOW GRID) -->
+    <section class="card" style="margin-top:16px;">
+      <h2 class="card__title">Live Bot Logs</h2>
+      <div class="log" id="log"></div>
+      <div class="row logFooter">
+        <div class="muted small">Auto-stop target</div>
+        <div class="pill pill--red">+65%</div>
+      </div>
     </section>
 
     <!-- FOOTER -->
