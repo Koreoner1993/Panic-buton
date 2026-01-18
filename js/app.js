@@ -1,4 +1,5 @@
-// Panic Button — wallet connect + demo bot engine (safe / no real trades)
+// Panic Button — Demo Bot + Robust Solana Wallet Detect/Connect
+// Safe: no real trading, no transactions. Only connects wallet + displays pubkey.
 
 const el = (id) => document.getElementById(id);
 
@@ -10,7 +11,7 @@ const state = {
   timer: null,
   profitPct: 0,     // simulated
   halted: false,    // cooled down after PANIC / auto-stop
-  provider: null,   // Phantom provider
+  provider: null,   // detected wallet provider
   pubkey: null,     // connected address string
 };
 
@@ -33,27 +34,6 @@ function shortAddr(a) {
   return `${a.slice(0, 4)}…${a.slice(-4)}`;
 }
 
-/**
- * Phantom provider detection (Solana)
- * Phantom docs show connecting with provider.connect(). :contentReference[oaicite:2]{index=2}
- */
-function getPhantomProvider() {
-  const w = window;
-
-  // Newer recommended injection: window.phantom.solana
-  const p1 = w?.phantom?.solana;
-
-  // Legacy/common injection: window.solana
-  const p2 = w?.solana;
-
-  const provider =
-    (p1 && p1.isPhantom ? p1 : null) ||
-    (p2 && p2.isPhantom ? p2 : null) ||
-    null;
-
-  return provider;
-}
-
 function setWalletUIConnected(connected) {
   const walletPill = el("walletPill");
   const addrText = el("addrText");
@@ -69,7 +49,7 @@ function setDemoMode(on) {
   state.demo = on;
   const modePill = el("modePill");
   if (modePill) modePill.textContent = on ? "Mode: Demo" : "Mode: Live";
-  log(on ? "DEMO enabled (simulated scanning + trades)" : "LIVE selected (still simulated trades until vault is wired)", "hot");
+  log(on ? "DEMO enabled (simulated scanning + trades)" : "LIVE selected (connected wallet; trades still simulated)", "hot");
 }
 
 function setPanicLevel(n) {
@@ -181,47 +161,107 @@ function panic() {
   log("PANIC — bot halted. (cooled down)", "bad");
 }
 
-// ----------- Phantom connect (real) -----------
-async function connectPhantom() {
-  const provider = getPhantomProvider();
+// ----------- Wallet Provider Detection (Robust) -----------
+// Handles:
+// - window.phantom.solana
+// - window.solana
+// - window.solana.providers (multi-wallet environments)
+function getSolanaProviderPreferPhantom() {
+  const w = window;
+
+  const candidates = [];
+
+  if (w?.phantom?.solana) candidates.push(w.phantom.solana);
+  if (w?.solana) candidates.push(w.solana);
+
+  if (Array.isArray(w?.solana?.providers)) {
+    candidates.push(...w.solana.providers);
+  }
+
+  // Filter out nullish
+  const filtered = candidates.filter(Boolean);
+
+  // Prefer Phantom if available
+  const phantom = filtered.find((p) => p?.isPhantom);
+  return phantom || filtered[0] || null;
+}
+
+function logProviderDebug() {
+  const hasPhantom = !!window?.phantom?.solana;
+  const hasSolana = !!window?.solana;
+  const providersCount = Array.isArray(window?.solana?.providers) ? window.solana.providers.length : 0;
+
+  log(
+    `DEBUG — window.phantom.solana: ${hasPhantom ? "YES" : "NO"} | window.solana: ${hasSolana ? "YES" : "NO"} | providers: ${providersCount}`,
+    "hot"
+  );
+
+  // Also to console (for devtools)
+  console.log("window.phantom:", window.phantom);
+  console.log("window.solana:", window.solana);
+}
+
+// ----------- Phantom Connect (real) -----------
+async function connectWallet() {
+  const provider = getSolanaProviderPreferPhantom();
+
+  logProviderDebug();
+
   if (!provider) {
-    log("WALLET — Phantom not found. Install Phantom browser extension.", "bad");
-    alert("Phantom not found. Please install Phantom and refresh.");
+    log("WALLET — no Solana wallet detected.", "bad");
+    alert(
+      "No Solana wallet detected.\n\n" +
+      "Desktop: Install Phantom extension in Chrome/Brave/Edge.\n" +
+      "Mobile: Open this site inside Phantom's in-app browser."
+    );
     return;
   }
 
   state.provider = provider;
 
   try {
-    // Recommended by Phantom: provider.connect() :contentReference[oaicite:3]{index=3}
-    const resp = await provider.connect();
-    const pk = resp?.publicKey?.toString?.() || provider?.publicKey?.toString?.();
+    const resp = await provider.connect(); // will prompt wallet
+    const pk =
+      resp?.publicKey?.toString?.() ||
+      provider?.publicKey?.toString?.() ||
+      null;
 
-    state.pubkey = pk || null;
+    state.pubkey = pk;
 
-    // Once connected, treat as “live” mode (still demo trades until on-chain vault wired)
+    // Once connected, treat as “live” mode (still simulated trades)
     setDemoMode(false);
-    setWalletUIConnected(true);
+    setWalletUIConnected(!!state.pubkey);
 
     log(`WALLET — connected: <span class="mono">${state.pubkey}</span>`, "ok");
   } catch (e) {
-    // user rejected, etc.
     log("WALLET — connect cancelled or failed.", "bad");
     console.error(e);
   }
 }
 
-function disconnectPhantom() {
-  // Phantom has provider.disconnect(), but “disconnecting” is optional UX;
-  // user can also remove site connection in Phantom settings.
-  const provider = state.provider;
+// Optional eager connect if already approved previously
+async function eagerConnectIfTrusted() {
+  const provider = getSolanaProviderPreferPhantom();
+  if (!provider) return;
+
+  // Some providers support onlyIfTrusted
   try {
-    provider?.disconnect?.();
-  } catch {}
-  state.pubkey = null;
-  setDemoMode(true);
-  setWalletUIConnected(false);
-  log("WALLET — disconnected (local state).", "hot");
+    const resp = await provider.connect?.({ onlyIfTrusted: true });
+    const pk =
+      resp?.publicKey?.toString?.() ||
+      provider?.publicKey?.toString?.() ||
+      null;
+
+    if (pk) {
+      state.provider = provider;
+      state.pubkey = pk;
+      setDemoMode(false);
+      setWalletUIConnected(true);
+      log(`WALLET — trusted connect: <span class="mono">${state.pubkey}</span>`, "ok");
+    }
+  } catch {
+    // ignore
+  }
 }
 
 // ----------- Boot -----------
@@ -249,8 +289,8 @@ function boot() {
   }
 
   // wire buttons
-  el("connectBtn")?.addEventListener("click", connectPhantom);
-  el("connectBtn2")?.addEventListener("click", connectPhantom);
+  el("connectBtn")?.addEventListener("click", connectWallet);
+  el("connectBtn2")?.addEventListener("click", connectWallet);
 
   el("demoBtn")?.addEventListener("click", () => setDemoMode(true));
 
@@ -259,29 +299,10 @@ function boot() {
 
   el("panicBtn")?.addEventListener("click", panic);
 
-  // Optional: if already trusted/connected, try “eager connect”
-  // NOTE: this only works if user previously approved the site.
-  const provider = getPhantomProvider();
-  if (provider) {
-    // some providers support onlyIfTrusted
-    provider.connect?.({ onlyIfTrusted: true })
-      .then((resp) => {
-        const pk = resp?.publicKey?.toString?.() || provider?.publicKey?.toString?.();
-        if (pk) {
-          state.provider = provider;
-          state.pubkey = pk;
-          setDemoMode(false);
-          setWalletUIConnected(true);
-          log(`WALLET — trusted connect: <span class="mono">${state.pubkey}</span>`, "ok");
-        }
-      })
-      .catch(() => {});
-  }
+  log("BOOT — press START for demo scans. Connect Phantom to show wallet.", "hot");
 
-  log("BOOT — press START for demo scans. Connect Phantom for wallet display.", "hot");
-
-  // You can expose disconnect in console for now:
-  window.panicDisconnect = disconnectPhantom;
+  // attempt eager connect
+  eagerConnectIfTrusted();
 }
 
 boot();
