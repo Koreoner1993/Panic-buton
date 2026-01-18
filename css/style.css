@@ -293,6 +293,33 @@ input[type="range"]{width:100%}
   margin-top:12px;
 }
 
+/* Panic button states (JS toggles these) */
+.panicBtn.is-hot .panicBtn__cap{
+  animation: panicPulse 1.1s ease-in-out infinite;
+}
+.panicBtn.is-hot .panicBtn__ring{
+  box-shadow: 0 0 65px rgba(255,27,27,.60);
+}
+
+@keyframes panicPulse{
+  0%,100% { filter: brightness(1.0); transform: translate(-50%,-50%) scale(1); }
+  50%     { filter: brightness(1.12); transform: translate(-50%,-50%) scale(1.03); }
+}
+
+.panicBtn.is-cooled .panicBtn__cap{
+  background: radial-gradient(circle at 30% 25%, #6b6b6b, #1c1c1c 70%);
+  box-shadow: inset 0 8px 0 rgba(255,255,255,.04),
+              0 0 22px rgba(255,255,255,.06);
+  animation:none;
+}
+.panicBtn.is-cooled .panicBtn__ring{
+  border-color: rgba(255,255,255,.25);
+  box-shadow:none;
+  opacity:.85;
+}
+
+
+
 /* PANIC LEVEL TAG */
 .panicLevel{
   display:inline-flex;
@@ -310,3 +337,9 @@ input[type="range"]{width:100%}
   padding-top:18px;
   border-top:1px solid rgba(255,255,255,.08);
 }
+
+.log .ok{color:#8bffb3}
+.log .bad{color:#ff8b8b}
+.log .hot{color:#ffd27a}
+
+
