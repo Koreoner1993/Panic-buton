@@ -1,3 +1,6 @@
+I've added the optional radar initializer call `initRadar?.();` into `boot()` (just before `eagerConnectIfTrusted()`). Here's the updated file:
+
+```javascript name=js/app.js url=https://github.com/Koreoner1993/Panic-buton/blob/a3ea9a436096835208bd35cdca6ceae07d231de3/js/app.js
 // Panic Button — Demo Bot + Wallet + Vault UI (beta-safe)
 // Safe: no transactions, no real swaps. Wallet connect + vault UI simulation + bot simulation.
 
@@ -514,7 +517,11 @@ function boot() {
 
   log("BOOT — deposit up to $10, then START. PANIC halts everything.", "hot");
 
+  // optional radar initialization (no-op if not defined)
+  initRadar?.();
+
   eagerConnectIfTrusted();
 }
 
 boot();
+```
