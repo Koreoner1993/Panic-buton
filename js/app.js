@@ -1,12 +1,9 @@
-// Panic Button — Wallet + Vault UI + 100Hrs Panic Window (DexScreener Radar) + Demo Bot
-// Safe beta: no real swaps, no transactions. Wallet connect + vault simulation + market radar + simulated trades.
-
-const el = (id) => document.getElementById(id);
+// Panic Button — SAFE BUILD (won’t crash if HTML IDs are missing)
+// Wallet connect + Vault UI + Radar (DexScreener) + Bot simulation
 
 const HOUR = 60 * 60 * 1000;
 
 const state = {
-  // modes / bot
   demo: true,
   running: false,
   panicLevel: 0,
@@ -15,33 +12,47 @@ const state = {
   profitPct: 0,
   halted: false,
 
-  // wallet
   provider: null,
   pubkey: null,
 
-  // vault (simulated)
   vaultUSDC: 0,
   maxVaultUSDC: 10,
   tradeSizeUSDC: 1,
   activeTrade: false,
 
-  // radar
   radar: {
-    enabled: true,
     cacheKey: "panic_radar_cache_v1",
-    windowMs: 100 * HOUR,          // 100 hours
-    pollMs: 90 * 1000,             // radar refresh interval
+    windowMs: 100 * HOUR,
+    pollMs: 90 * 1000,
     timer: null,
     best: null,
     lastRefresh: 0,
   },
 };
 
+// ---------- DOM helpers (safe) ----------
+const el = (id) => document.getElementById(id);
+const exists = (id) => !!el(id);
+
+function setText(id, text) {
+  const n = el(id);
+  if (n) n.textContent = text;
+}
+
+function setHTML(id, html) {
+  const n = el(id);
+  if (n) n.innerHTML = html;
+}
+
 function now() { return new Date().toLocaleTimeString(); }
 
 function log(msg, cls = "") {
+  // Always console log too (so you can see errors even if UI log is missing)
+  console.log(`[PANIC] ${msg}`);
+
   const box = el("log");
   if (!box) return;
+
   const line = document.createElement("div");
   line.className = cls;
   line.innerHTML = `[${now()}] ${msg}`;
@@ -75,22 +86,21 @@ function pct(n) {
   return `${sign}${v.toFixed(2)}%`;
 }
 
-// ---------------- UI setters ----------------
-function setWalletUIConnected(connected) {
-  el("walletPill").textContent = connected ? "Wallet: Connected" : "Wallet: Not Connected";
-  el("addrText").textContent = connected ? shortAddr(state.pubkey) : "—";
-  el("modePill").textContent = state.demo ? "Mode: Demo" : "Mode: Live";
-}
-
+// ---------- UI setters (safe) ----------
 function setDemoMode(on) {
   state.demo = on;
-  el("modePill").textContent = on ? "Mode: Demo" : "Mode: Live";
-  log(on ? "DEMO enabled (simulated execution)" : "LIVE selected (wallet connected; execution still simulated)", "hot");
+  setText("modePill", on ? "Mode: Demo" : "Mode: Live");
+}
+
+function setWalletUIConnected(connected) {
+  setText("walletPill", connected ? "Wallet: Connected" : "Wallet: Not Connected");
+  setText("addrText", connected ? shortAddr(state.pubkey) : "—");
+  setText("modePill", state.demo ? "Mode: Demo" : "Mode: Live");
 }
 
 function setPanicLevel(n) {
   state.panicLevel = n;
-  el("panicLevel").textContent = String(n);
+  setText("panicLevel", String(n));
 
   const btn = el("panicBtn");
   if (!btn) return;
@@ -104,17 +114,17 @@ function setPanicLevel(n) {
 }
 
 function setVaultUI() {
-  el("vaultBalance").textContent = money(state.vaultUSDC);
+  if (exists("vaultBalance")) setText("vaultBalance", money(state.vaultUSDC));
 
   const canUseVault = !!state.pubkey;
-  el("depositBtn").disabled = !canUseVault;
-  el("withdrawBtn").disabled = !canUseVault;
 
-  el("depositBtn").style.opacity = canUseVault ? "1" : ".55";
-  el("withdrawBtn").style.opacity = canUseVault ? "1" : ".55";
+  const dep = el("depositBtn");
+  const wd = el("withdrawBtn");
+  if (dep) { dep.disabled = !canUseVault; dep.style.opacity = canUseVault ? "1" : ".55"; }
+  if (wd)  { wd.disabled  = !canUseVault; wd.style.opacity  = canUseVault ? "1" : ".55"; }
 }
 
-// ---------------- Copy address ----------------
+// ---------- Copy address ----------
 function enableCopyAddress() {
   const addrEl = el("addrText");
   if (!addrEl) return;
@@ -131,7 +141,6 @@ function enableCopyAddress() {
       }
     } catch {}
 
-    // fallback
     try {
       const ta = document.createElement("textarea");
       ta.value = text;
@@ -152,7 +161,7 @@ function enableCopyAddress() {
   });
 }
 
-// ---------------- Network check (RPC) ----------------
+// ---------- Network check (RPC) ----------
 async function checkNetwork() {
   const statusEl = el("networkStatus");
   if (!statusEl) return;
@@ -186,7 +195,7 @@ async function checkNetwork() {
   }
 }
 
-// ---------------- Provider detection ----------------
+// ---------- Provider detection ----------
 function getSolanaProviderPreferPhantom() {
   const w = window;
   const candidates = [];
@@ -199,25 +208,13 @@ function getSolanaProviderPreferPhantom() {
   return phantom || filtered[0] || null;
 }
 
-function logProviderDebug() {
-  const hasPhantom = !!window?.phantom?.solana;
-  const hasSolana = !!window?.solana;
-  const providersCount = Array.isArray(window?.solana?.providers) ? window.solana.providers.length : 0;
-  log(`DEBUG — phantom.solana: ${hasPhantom ? "YES" : "NO"} | solana: ${hasSolana ? "YES" : "NO"} | providers: ${providersCount}`, "hot");
-}
-
-// ---------------- Wallet connect/disconnect ----------------
+// ---------- Wallet connect/disconnect ----------
 async function connectWallet() {
   const provider = getSolanaProviderPreferPhantom();
-  logProviderDebug();
 
   if (!provider) {
     log("WALLET — no Solana wallet detected.", "bad");
-    alert(
-      "No Solana wallet detected.\n\n" +
-      "Desktop: Install Phantom extension in Chrome/Brave/Edge.\n" +
-      "Mobile: Open this site inside Phantom's in-app browser."
-    );
+    alert("No Solana wallet detected. Install Phantom (desktop) or open in Phantom browser (mobile).");
     return;
   }
 
@@ -233,10 +230,10 @@ async function connectWallet() {
     state.pubkey = pk;
     setDemoMode(false);
     setWalletUIConnected(!!state.pubkey);
-    log(`WALLET — connected: <span class="mono">${state.pubkey}</span>`, "ok");
-
-    await checkNetwork();
     setVaultUI();
+
+    log(`WALLET — connected: <span class="mono">${state.pubkey}</span>`, "ok");
+    await checkNetwork();
   } catch (e) {
     log("WALLET — connect cancelled or failed.", "bad");
     console.error(e);
@@ -290,18 +287,22 @@ async function eagerConnectIfTrusted() {
 
       setDemoMode(false);
       setWalletUIConnected(true);
-      log(`WALLET — trusted connect: <span class="mono">${state.pubkey}</span>`, "ok");
-
-      await checkNetwork();
       setVaultUI();
+
+      log(`WALLET — trusted connect: <span class="mono">${state.pubkey}</span>`, "ok");
+      await checkNetwork();
     }
   } catch {
     // ignore
   }
 }
 
-// ---------------- Vault logic (beta UI) ----------------
+// ---------- Vault logic ----------
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+function maxDepositRemaining() {
+  return clamp(state.maxVaultUSDC - state.vaultUSDC, 0, state.maxVaultUSDC);
+}
 
 function getDepositInput() {
   const v = Number(el("depositAmt")?.value || 0);
@@ -315,10 +316,6 @@ function setDepositInput(val) {
   input.value = Number(val).toFixed(2);
 }
 
-function maxDepositRemaining() {
-  return clamp(state.maxVaultUSDC - state.vaultUSDC, 0, state.maxVaultUSDC);
-}
-
 function depositUSDC() {
   if (!state.pubkey) { log("VAULT — connect wallet first.", "bad"); return; }
 
@@ -330,10 +327,9 @@ function depositUSDC() {
 
   const add = Math.min(amt, remaining);
   state.vaultUSDC = +(state.vaultUSDC + add).toFixed(2);
-
   setVaultUI();
-  log(`VAULT — deposited ${money(add)} (vault now ${money(state.vaultUSDC)})`, "ok");
 
+  log(`VAULT — deposited ${money(add)} (vault now ${money(state.vaultUSDC)})`, "ok");
   if (amt > remaining) log(`VAULT — capped at $10 (ignored extra ${money(amt - remaining)})`, "hot");
 }
 
@@ -347,9 +343,7 @@ function withdrawUSDC() {
   log(`VAULT — withdrew ${money(out)} (vault now ${money(state.vaultUSDC)})`, "ok");
 }
 
-// ---------------- RADAR (DexScreener) ----------------
-
-// Cache shape: { [pairAddress]: { ts:number, item: RadarItem } }
+// ---------- RADAR (DexScreener) ----------
 function loadRadarCache() {
   try {
     const raw = localStorage.getItem(state.radar.cacheKey);
@@ -362,11 +356,7 @@ function loadRadarCache() {
 }
 
 function saveRadarCache(cache) {
-  try {
-    localStorage.setItem(state.radar.cacheKey, JSON.stringify(cache));
-  } catch {
-    // ignore quota issues
-  }
+  try { localStorage.setItem(state.radar.cacheKey, JSON.stringify(cache)); } catch {}
 }
 
 function pruneRadarCache(cache) {
@@ -378,14 +368,7 @@ function pruneRadarCache(cache) {
 }
 
 function panicLabel(level) {
-  switch (level) {
-    case 0: return "Asleep";
-    case 1: return "Twitching";
-    case 2: return "Sweaty";
-    case 3: return "Redline";
-    case 4: return "Full Panic";
-    default: return "Asleep";
-  }
+  return ["Asleep", "Twitching", "Sweaty", "Redline", "Full Panic"][level] || "Asleep";
 }
 
 function levelFromScore(score) {
@@ -396,7 +379,6 @@ function levelFromScore(score) {
   return 4;
 }
 
-// log-scale normalization for volume/liquidity
 function normLog(x, min, max) {
   const v = Math.max(0, Number(x || 0));
   const l = Math.log10(v + 1);
@@ -406,8 +388,12 @@ function normLog(x, min, max) {
   return clamp((l - lmin) / (lmax - lmin), 0, 1);
 }
 
+function isUSDCQuote(pair) {
+  const q = pair?.quoteToken?.symbol?.toUpperCase?.() || "";
+  return q === "USDC";
+}
+
 function scorePair(p) {
-  // DexScreener pair fields
   const liq = Number(p?.liquidity?.usd || 0);
   const vol24 = Number(p?.volume?.h24 || 0);
 
@@ -415,71 +401,43 @@ function scorePair(p) {
   const ch6 = Number(p?.priceChange?.h6 || 0);
   const ch24 = Number(p?.priceChange?.h24 || 0);
 
-  // gates / ranges tuned for meme reality
-  const liqN = normLog(liq, 5_000, 2_000_000);         // 5k..2m
-  const volN = normLog(vol24, 20_000, 20_000_000);     // 20k..20m
+  const liqN = normLog(liq, 5_000, 2_000_000);
+  const volN = normLog(vol24, 20_000, 20_000_000);
 
-  // momentum: favor positive, penalize heavy negative
   const momRaw = (ch1 * 0.55) + (ch6 * 0.35) + (ch24 * 0.10);
-  const momN = clamp((momRaw + 20) / 80, 0, 1);        // map -20..+60 → 0..1
+  const momN = clamp((momRaw + 20) / 80, 0, 1);
 
   let score = (volN * 0.48 + liqN * 0.37 + momN * 0.15) * 100;
 
-  // liquidity rug-vibes penalty
   if (liq < 20_000) score *= 0.25;
-  if (liq < 50_000) score *= 0.65;
+  else if (liq < 50_000) score *= 0.65;
 
   return clamp(score, 0, 100);
 }
 
-function isUSDCQuote(pair) {
-  const q = pair?.quoteToken?.symbol?.toUpperCase?.() || "";
-  return q === "USDC";
-}
+function normalizePairToRadarItem(pair) {
+  const baseSym = pair?.baseToken?.symbol || "TOKEN";
+  const quoteSym = pair?.quoteToken?.symbol || "PAIR";
+  const name = `${baseSym}/${quoteSym}`;
 
-function radarRowHTML(item) {
-  const lvl = item.panicLevel;
-  const badgeCls = `panicBadge panic${lvl} panic${lvl}`;
-  const safeName = (item.name || "UNKNOWN").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const url = item.url || "#";
+  const liq = Number(pair?.liquidity?.usd || 0);
+  const vol24 = Number(pair?.volume?.h24 || 0);
 
-  const meta = [
-    `liq ${compactUsd(item.liquidityUsd)}`,
-    `vol24 ${compactUsd(item.volume24h)}`,
-    `1h ${pct(item.change1h)}`,
-  ].join(" · ");
+  const score = scorePair(pair);
+  const panicLevel = levelFromScore(score);
 
-  return `
-    <div class="radarRow">
-      <div class="radarRow__left">
-        <div class="radarName">${safeName}</div>
-        <div class="radarMeta">${meta}</div>
-      </div>
-      <div class="radarRow__right">
-        <span class="${badgeCls}" title="${panicLabel(lvl)}">${lvl}</span>
-        <a class="radarBtnLink" href="${url}" target="_blank" rel="noreferrer">View</a>
-      </div>
-    </div>
-  `;
-}
-
-function renderRadar(items) {
-  const list = el("radarList");
-  const best = el("radarBest");
-  if (!list || !best) return;
-
-  if (!items || items.length === 0) {
-    list.innerHTML = `<div class="muted small">Radar is asleep. Hit Refresh.</div>`;
-    best.textContent = "—";
-    state.radar.best = null;
-    return;
-  }
-
-  // best pick shown
-  state.radar.best = items[0];
-  best.textContent = `${items[0].name} (Panic ${items[0].panicLevel} — ${panicLabel(items[0].panicLevel)})`;
-
-  list.innerHTML = items.slice(0, 5).map(radarRowHTML).join("");
+  return {
+    pairAddress: pair?.pairAddress || "",
+    name,
+    url: pair?.url || "",
+    liquidityUsd: liq,
+    volume24h: vol24,
+    change1h: Number(pair?.priceChange?.h1 || 0),
+    score,
+    panicLevel,
+    usdcQuote: isUSDCQuote(pair),
+    ts: Date.now(),
+  };
 }
 
 function readRadarItemsFromCache(cache) {
@@ -492,7 +450,6 @@ function readRadarItemsFromCache(cache) {
 }
 
 function sortRadar(items) {
-  // USDC-first priority then score
   return items.sort((a, b) => {
     const aUSDC = a.usdcQuote ? 1 : 0;
     const bUSDC = b.usdcQuote ? 1 : 0;
@@ -501,7 +458,40 @@ function sortRadar(items) {
   });
 }
 
-// DexScreener fetch helpers
+function radarRowHTML(item) {
+  const lvl = item.panicLevel;
+  const safeName = (item.name || "UNKNOWN").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const meta = `liq ${compactUsd(item.liquidityUsd)} · vol24 ${compactUsd(item.volume24h)} · 1h ${pct(item.change1h)}`;
+
+  return `
+    <div class="radarRow">
+      <div class="radarRow__left">
+        <div class="radarName">${safeName}</div>
+        <div class="radarMeta">${meta}</div>
+      </div>
+      <div class="radarRow__right">
+        <span class="panicBadge panic${lvl}" title="${panicLabel(lvl)}">${lvl}</span>
+        <a class="radarBtnLink" href="${item.url}" target="_blank" rel="noreferrer">View</a>
+      </div>
+    </div>
+  `;
+}
+
+function renderRadar(items) {
+  if (!exists("radarList") || !exists("radarBest")) return;
+
+  if (!items || items.length === 0) {
+    setHTML("radarList", `<div class="muted small">Radar is asleep. Hit Refresh.</div>`);
+    setText("radarBest", "—");
+    state.radar.best = null;
+    return;
+  }
+
+  state.radar.best = items[0];
+  setText("radarBest", `${items[0].name} (Panic ${items[0].panicLevel} — ${panicLabel(items[0].panicLevel)})`);
+  setHTML("radarList", items.slice(0, 5).map(radarRowHTML).join(""));
+}
+
 async function fetchJSON(url, timeoutMs = 12_000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -514,20 +504,6 @@ async function fetchJSON(url, timeoutMs = 12_000) {
   }
 }
 
-// 1) Discover candidates (boosts top)
-async function dsFetchBoostTop() {
-  // Public endpoint used for discovery
-  const url = "https://api.dexscreener.com/token-boosts/top/v1";
-  return await fetchJSON(url);
-}
-
-// 2) Enrich by token addresses (solana) up to 30 per request
-async function dsFetchSolanaTokens(addresses) {
-  const chunk = addresses.join(",");
-  const url = `https://api.dexscreener.com/tokens/v1/solana/${encodeURIComponent(chunk)}`;
-  return await fetchJSON(url);
-}
-
 function uniq(arr) {
   return Array.from(new Set(arr.filter(Boolean)));
 }
@@ -538,56 +514,20 @@ function chunk(arr, size) {
   return out;
 }
 
-function normalizePairToRadarItem(pair) {
-  const baseSym = pair?.baseToken?.symbol || "TOKEN";
-  const quoteSym = pair?.quoteToken?.symbol || "PAIR";
-  const name = `${baseSym}/${quoteSym}`;
-
-  const liq = Number(pair?.liquidity?.usd || 0);
-  const vol24 = Number(pair?.volume?.h24 || 0);
-  const change1h = Number(pair?.priceChange?.h1 || 0);
-  const change6h = Number(pair?.priceChange?.h6 || 0);
-  const change24h = Number(pair?.priceChange?.h24 || 0);
-
-  const score = scorePair(pair);
-  const panicLevel = levelFromScore(score);
-
-  return {
-    key: pair?.pairAddress || `${pair?.chainId}:${pair?.pairAddress || ""}`,
-    name,
-    baseMint: pair?.baseToken?.address || "",
-    quoteMint: pair?.quoteToken?.address || "",
-    pairAddress: pair?.pairAddress || "",
-    url: pair?.url || "",
-    dexId: pair?.dexId || "",
-    liquidityUsd: liq,
-    volume24h: vol24,
-    change1h,
-    change6h,
-    change24h,
-    score,
-    panicLevel,
-    usdcQuote: isUSDCQuote(pair),
-    ts: Date.now(),
-  };
-}
-
 async function refreshRadar({ userTriggered = false } = {}) {
+  if (!exists("radarList")) return; // radar card not present => skip cleanly
+
   const t0 = Date.now();
   if (userTriggered) log("RADAR — manual refresh (100Hrs Panic Window)", "hot");
 
-  // Load & prune cache
   let cache = pruneRadarCache(loadRadarCache());
 
   try {
-    // Discover candidate token addresses
-    const boosts = await dsFetchBoostTop();
-
-    // boosts can be objects; try to extract addresses robustly
+    // discovery
+    const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
     const addrs = uniq(
-      (Array.isArray(boosts) ? boosts : [])
-        .map((x) => x?.tokenAddress || x?.address || x?.token?.address)
-    ).slice(0, 90); // cap to reduce rate / keep it lean
+      (Array.isArray(boosts) ? boosts : []).map((x) => x?.tokenAddress || x?.address || x?.token?.address)
+    ).slice(0, 90);
 
     if (addrs.length === 0) {
       log("RADAR — no candidates returned (DexScreener)", "bad");
@@ -595,25 +535,24 @@ async function refreshRadar({ userTriggered = false } = {}) {
       return;
     }
 
-    log(`RADAR — discovered ${addrs.length} candidates (boost top)`, "hot");
+    log(`RADAR — discovered ${addrs.length} candidates`, "hot");
 
-    // Enrich in chunks of 30
+    // enrich
     const chunks = chunk(addrs, 30);
     const pairsAll = [];
 
     for (const c of chunks) {
       try {
-        const pairs = await dsFetchSolanaTokens(c);
+        const url = `https://api.dexscreener.com/tokens/v1/solana/${encodeURIComponent(c.join(","))}`;
+        const pairs = await fetchJSON(url);
         if (Array.isArray(pairs)) pairsAll.push(...pairs);
       } catch (e) {
-        log("RADAR — partial fetch failed (rate / network). continuing.", "bad");
+        log("RADAR — partial fetch failed. continuing.", "bad");
         console.error(e);
       }
-      // tiny delay to be polite
       await new Promise((r) => setTimeout(r, 250));
     }
 
-    // Convert pairs → items, store in cache
     let added = 0;
     for (const pair of pairsAll) {
       if (!pair?.pairAddress) continue;
@@ -625,22 +564,14 @@ async function refreshRadar({ userTriggered = false } = {}) {
     cache = pruneRadarCache(cache);
     saveRadarCache(cache);
 
-    // Build radar list
-    let items = readRadarItemsFromCache(cache);
-
-    // Filter: must be Solana (should be) and must have decent stats
-    items = items.filter((it) => (it.liquidityUsd > 0 && it.volume24h > 0));
-
-    // USDC-first fallback any pairs
+    let items = readRadarItemsFromCache(cache).filter((it) => it.liquidityUsd > 0 && it.volume24h > 0);
     items = sortRadar(items);
 
-    // Render top 5
     renderRadar(items);
 
     const dt = ((Date.now() - t0) / 1000).toFixed(1);
     log(`RADAR — updated ${added} pairs · window 100h · ${dt}s`, "ok");
 
-    // extra: announce best pick
     if (items[0]) {
       const b = items[0];
       log(`LOCK — Best Pick: ${b.name} | Panic ${b.panicLevel} (${panicLabel(b.panicLevel)}) | liq ${compactUsd(b.liquidityUsd)} | vol24 ${compactUsd(b.volume24h)}`, "hot");
@@ -648,7 +579,6 @@ async function refreshRadar({ userTriggered = false } = {}) {
   } catch (e) {
     console.error(e);
     log("RADAR — failed to refresh (DexScreener). Try again.", "bad");
-    // still render what we have
     renderRadar(sortRadar(readRadarItemsFromCache(cache)));
   } finally {
     state.radar.lastRefresh = Date.now();
@@ -663,6 +593,7 @@ function clearRadarCache() {
 }
 
 function startRadarLoop() {
+  if (!exists("radarList")) return; // if you didn’t add radar card, don’t loop
   stopRadarLoop();
   refreshRadar({ userTriggered: false });
   state.radar.timer = setInterval(() => refreshRadar({ userTriggered: false }), state.radar.pollMs);
@@ -674,13 +605,29 @@ function stopRadarLoop() {
   state.radar.timer = null;
 }
 
-// ---------------- Bot logic (uses Radar pick) ----------------
+// ---------- Bot ----------
 function stopBot(reason = "Stopped") {
   if (state.timer) clearInterval(state.timer);
   state.timer = null;
   state.running = false;
   state.activeTrade = false;
   log(`STOP — ${reason}`, "bad");
+}
+
+function chooseRadarTarget() {
+  const cache = pruneRadarCache(loadRadarCache());
+  const items = sortRadar(readRadarItemsFromCache(cache));
+  const hot = items.filter((x) => x.panicLevel >= 2);
+  const pick = hot[0] || items[0] || null;
+  state.radar.best = pick;
+  return pick;
+}
+
+function quoteOk() {
+  const b = state.radar.best;
+  if (!b) return Math.random() > 0.3;
+  if (b.liquidityUsd < 30_000) return Math.random() > 0.55;
+  return Math.random() > 0.22;
 }
 
 function startBot() {
@@ -691,8 +638,8 @@ function startBot() {
     return;
   }
 
-  // need radar best pick
-  if (!state.radar.best) {
+  const target = chooseRadarTarget();
+  if (!target) {
     log("BOT — Radar is asleep. Hit Refresh Radar first.", "bad");
     return;
   }
@@ -705,4 +652,67 @@ function startBot() {
   }
 
   state.running = true;
-  log(`START — bo
+  log(`START — bot running (cooldown ${state.cooldownSec}s)`, "ok");
+
+  tick();
+  state.timer = setInterval(tick, state.cooldownSec * 1000);
+}
+
+function tick() {
+  if (!state.running || state.halted) return;
+
+  const target = chooseRadarTarget();
+  if (!target) {
+    log("BOT — no radar target. stopping.", "bad");
+    stopBot("Radar empty");
+    return;
+  }
+
+  setPanicLevel(target.panicLevel);
+  log(`RADAR — target ${target.name} → Panic ${target.panicLevel} (${panicLabel(target.panicLevel)})`, "hot");
+
+  if (target.panicLevel >= 3) {
+    if (state.activeTrade) {
+      log("BOT — one trade at a time. waiting.", "hot");
+      return;
+    }
+
+    if (state.vaultUSDC < state.tradeSizeUSDC) {
+      log(`BOT — vault too low (${money(state.vaultUSDC)}). deposit more.`, "bad");
+      stopBot("Vault empty");
+      return;
+    }
+
+    if (!quoteOk()) {
+      log("QUOTE — route looks trash. skip (slippage/rug vibes).", "bad");
+      return;
+    }
+
+    state.activeTrade = true;
+
+    state.vaultUSDC = +(state.vaultUSDC - state.tradeSizeUSDC).toFixed(2);
+    setVaultUI();
+    log(`TRADE — spent ${money(state.tradeSizeUSDC)} USDC on ${target.name}`, "ok");
+
+    setTimeout(() => {
+      const pnlPct = (Math.random() * 8 - 3);
+      const returned = +(state.tradeSizeUSDC * (1 + pnlPct / 100)).toFixed(2);
+
+      state.vaultUSDC = +(state.vaultUSDC + returned).toFixed(2);
+      state.profitPct += pnlPct;
+
+      setVaultUI();
+      log(`SETTLE — ${target.name} returned ${money(returned)} (PnL ${pnlPct.toFixed(2)}%)`, pnlPct >= 0 ? "ok" : "bad");
+
+      state.activeTrade = false;
+
+      if (state.profitPct >= 65) {
+        stopBot("AUTO-STOP hit +65% (simulated).");
+        state.halted = true;
+        const btn = el("panicBtn");
+        if (btn) {
+          btn.classList.remove("is-hot");
+          btn.classList.add("is-cooled");
+        }
+        log("AUTO — cooled down.", "hot");
+   
