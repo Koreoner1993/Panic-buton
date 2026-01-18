@@ -342,4 +342,35 @@ input[type="range"]{width:100%}
 .log .bad{color:#ff8b8b}
 .log .hot{color:#ffd27a}
 
+/* Vault input */
+.inputRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+}
+
+.inputPrefix{
+  color: rgba(255,255,255,.7);
+  font-weight:900;
+}
+
+.input{
+  flex:1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color:#fff;
+  font-weight:900;
+  font-size:14px;
+}
+
+.btn--mini{
+  padding:10px 12px;
+  border-radius:12px;
+}
+
 
