@@ -1,1 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Panic Button — Beta is Live</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- Favicon (uses your logo) -->
+  <link rel="icon" type="image/png" href="./assets/panic-logo.png">
+</head>
+
+<body>
+  <div class="bg-grain" aria-hidden="true"></div>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <img
+          src="./assets/panic-logo.png"
+          alt="Panic Button Logo"
+          style="width:18px;height:18px;border-radius:50%;box-shadow:0 0 12px rgba(255,27,27,.6);"
+        />
+        <div class="brand__text">
+          <div class="brand__title">PANIC BUTTON</div>
+          <div class="brand__sub">beta is live</div>
+        </div>
+      </div>
+
+      <nav class="links">
+        <a class="link" href="https://x.com/PanicButtonton" target="_blank" rel="noreferrer">
+          @PanicButtonton
+        </a>
+        <a class="link link--outline" href="https://x.com/i/communities/2010590489972469792" target="_blank" rel="noreferrer">
+          Community
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__left">
+        <h1 class="hero__h1">Panic Button</h1>
+        <p class="hero__beta">Beta is live</p>
+
+        <p class="hero__p">
+          One-page degen control panel.
+          <span class="muted">Experimental. $1 micro-trades. Panic anytime.</span>
+        </p>
+
+        <div class="hero__status">
+          <div class="pill" id="walletPill">Wallet: Not Connected</div>
+          <div class="pill pill--dim" id="modePill">Mode: Demo</div>
+        </div>
+
+        <div class="hero__ctaRow">
+          <button class="btn btn--primary" id="connectBtn">Connect Phantom</button>
+          <button class="btn btn--ghost" id="demoBtn">Run Demo</button>
+        </div>
+
+        <p class="fineprint">
+          Beta rules:
+          <b>$10 max deposit</b>,
+          <b>$1 max per trade</b>,
+          <b>one trade at a time</b>,
+          <b>auto-stop at +65%</b>.
+          <span class="muted">No promises.</span>
+        </p>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="hero__right">
+
+        <!-- BANNER -->
+        <div class="bannerFrame">
+          <img
+            class="bannerImg"
+            src="./assets/panic-banner.png"
+            alt="Panic Button Banner"
+          />
+          <div class="bannerGlow" aria-hidden="true"></div>
+        </div>
+
+        <!-- PANIC BUTTON -->
+        <button class="panicBtn" id="panicBtn" aria-label="Panic button">
+
+          <span class="panicBtn__ring" aria-hidden="true"></span>
+
+          <span class="panicBtn__cap" aria-hidden="true">
+            <img
+              src="./assets/panic-logo.png"
+              alt="Panic Logo"
+              style="
+                width:64px;
+                height:64px;
+                border-radius:50%;
+                filter: drop-shadow(0 0 10px rgba(0,0,0,.8));
+              "
+            />
+          </span>
+
+          <span class="panicBtn__text">PANIC</span>
+        </button>
+
+        <div class="hint">
+          Rugpull yourself before the market does.
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTROL GRID -->
+    <section class="grid">
+
+      <div class="card">
+        <h2 class="card__title">Wallet</h2>
+        <div class="row">
+          <div class="kv">
+            <div class="k">Address</div>
+            <div class="v mono" id="addrText">—</div>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn btn--primary" id="connectBtn2">Connect Wallet</button>
+        </div>
+        <div class="row small muted">
+          USDC vault is separate. Token is vibes.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card__title">AI Bot</h2>
+
+        <div class="row">
+          <div class="kv">
+            <div class="k">Panic Level</div>
+            <div class="v"><span class="panicLevel" id="panicLevel">0</span></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="label">Cooldown</label>
+          <input id="cooldown" type="range" min="30" max="180" value="90" />
+          <div class="muted small"><span id="cooldownVal">90</span>s</div>
+        </div>
+
+        <div class="row btnRow">
+          <button class="btn btn--primary" id="startBtn">Start</button>
+          <button class="btn btn--dim" id="stopBtn">Stop</button>
+        </div>
+
+        <div class="row small muted">
+          Tokens only · WebSocket + polling
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card__title">Live Bot Logs</h2>
+        <div class="log" id="log"></div>
+        <div class="row logFooter">
+          <div class="muted small">Auto-stop target</div>
+          <div class="pill pill--red">+65%</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="muted small">
+        panic is experimental · panic is a meme · not financial advice
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>
 
