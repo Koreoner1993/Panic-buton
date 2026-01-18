@@ -1,4 +1,5 @@
-
+// Panic Button — Demo Bot + Wallet + Vault UI (beta-safe)
+// Safe: no transactions, no real swaps. Wallet connect + vault UI simulation + bot simulation.
 
 const el = (id) => document.getElementById(id);
 
@@ -513,11 +514,7 @@ function boot() {
 
   log("BOOT — deposit up to $10, then START. PANIC halts everything.", "hot");
 
-  // optional radar initialization (no-op if not defined)
-  initRadar?.();
-
   eagerConnectIfTrusted();
 }
 
-boot();
-```
+boot(initRadar?.(););
