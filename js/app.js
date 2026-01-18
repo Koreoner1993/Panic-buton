@@ -715,4 +715,4 @@ function tick() {
           btn.classList.add("is-cooled");
         }
         log("AUTO — cooled down.", "hot");
-   
+   }
