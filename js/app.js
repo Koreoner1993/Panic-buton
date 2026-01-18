@@ -47,9 +47,7 @@ function setHTML(id, html) {
 function now() { return new Date().toLocaleTimeString(); }
 
 function log(msg, cls = "") {
-  // Always console log too (so you can see errors even if UI log is missing)
   console.log(`[PANIC] ${msg}`);
-
   const box = el("log");
   if (!box) return;
 
@@ -86,7 +84,9 @@ function pct(n) {
   return `${sign}${v.toFixed(2)}%`;
 }
 
-// ---------- UI setters (safe) ----------
+function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+// ---------- UI setters ----------
 function setDemoMode(on) {
   state.demo = on;
   setText("modePill", on ? "Mode: Demo" : "Mode: Live");
@@ -161,7 +161,7 @@ function enableCopyAddress() {
   });
 }
 
-// ---------- Network check (RPC) ----------
+// ---------- Network check ----------
 async function checkNetwork() {
   const statusEl = el("networkStatus");
   if (!statusEl) return;
@@ -211,7 +211,6 @@ function getSolanaProviderPreferPhantom() {
 // ---------- Wallet connect/disconnect ----------
 async function connectWallet() {
   const provider = getSolanaProviderPreferPhantom();
-
   if (!provider) {
     log("WALLET — no Solana wallet detected.", "bad");
     alert("No Solana wallet detected. Install Phantom (desktop) or open in Phantom browser (mobile).");
@@ -297,9 +296,7 @@ async function eagerConnectIfTrusted() {
   }
 }
 
-// ---------- Vault logic ----------
-function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
+// ---------- Vault ----------
 function maxDepositRemaining() {
   return clamp(state.maxVaultUSDC - state.vaultUSDC, 0, state.maxVaultUSDC);
 }
@@ -343,7 +340,7 @@ function withdrawUSDC() {
   log(`VAULT — withdrew ${money(out)} (vault now ${money(state.vaultUSDC)})`, "ok");
 }
 
-// ---------- RADAR (DexScreener) ----------
+// ---------- RADAR ----------
 function loadRadarCache() {
   try {
     const raw = localStorage.getItem(state.radar.cacheKey);
@@ -515,19 +512,15 @@ function chunk(arr, size) {
 }
 
 async function refreshRadar({ userTriggered = false } = {}) {
-  if (!exists("radarList")) return; // radar card not present => skip cleanly
+  if (!exists("radarList")) return;
 
-  const t0 = Date.now();
   if (userTriggered) log("RADAR — manual refresh (100Hrs Panic Window)", "hot");
 
   let cache = pruneRadarCache(loadRadarCache());
 
   try {
-    // discovery
     const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
-    const addrs = uniq(
-      (Array.isArray(boosts) ? boosts : []).map((x) => x?.tokenAddress || x?.address || x?.token?.address)
-    ).slice(0, 90);
+    const addrs = uniq((Array.isArray(boosts) ? boosts : []).map((x) => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 90);
 
     if (addrs.length === 0) {
       log("RADAR — no candidates returned (DexScreener)", "bad");
@@ -535,9 +528,6 @@ async function refreshRadar({ userTriggered = false } = {}) {
       return;
     }
 
-    log(`RADAR — discovered ${addrs.length} candidates`, "hot");
-
-    // enrich
     const chunks = chunk(addrs, 30);
     const pairsAll = [];
 
@@ -569,8 +559,7 @@ async function refreshRadar({ userTriggered = false } = {}) {
 
     renderRadar(items);
 
-    const dt = ((Date.now() - t0) / 1000).toFixed(1);
-    log(`RADAR — updated ${added} pairs · window 100h · ${dt}s`, "ok");
+    log(`RADAR — updated ${added} pairs · window 100h`, "ok");
 
     if (items[0]) {
       const b = items[0];
@@ -593,7 +582,7 @@ function clearRadarCache() {
 }
 
 function startRadarLoop() {
-  if (!exists("radarList")) return; // if you didn’t add radar card, don’t loop
+  if (!exists("radarList")) return;
   stopRadarLoop();
   refreshRadar({ userTriggered: false });
   state.radar.timer = setInterval(() => refreshRadar({ userTriggered: false }), state.radar.pollMs);
@@ -715,4 +704,25 @@ function tick() {
           btn.classList.add("is-cooled");
         }
         log("AUTO — cooled down.", "hot");
-   }
+      }
+    }, 1200);
+  }
+}
+
+// ---------- Panic ----------
+function panic() {
+  stopBot("PANIC BUTTON PRESSED — rugged yourself.");
+  state.halted = true;
+  setPanicLevel(0);
+
+  const btn = el("panicBtn");
+  if (btn) {
+    btn.classList.remove("is-hot");
+    btn.classList.add("is-cooled");
+  }
+  log("PANIC — bot halted. (cooled down)", "bad");
+}
+
+// ---------- Boot ----------
+function boot() {
+ 
