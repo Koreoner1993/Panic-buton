@@ -377,5 +377,316 @@ function boot() {
 
 boot();
 
+/* =========================
+   RADAR — 100Hrs Panic Window (DISPLAY ONLY)
+   DexScreener polling + localStorage cache
+   Does NOT affect bot logic.
+========================= */
+
+(function RadarDisplayOnly(){
+  const HOUR = 60 * 60 * 1000;
+  const RADAR_WINDOW_MS = 100 * HOUR;
+  const RADAR_KEY = "panic_radar_cache_v1";
+  const POLL_MS = 120 * 1000; // 2 minutes (safe)
+
+  const $ = (id) => document.getElementById(id);
+
+  function radarExists(){
+    return !!$("radarList") && !!$("radarBest");
+  }
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function compactUsd(n){
+    const v = Number(n || 0);
+    if (!Number.isFinite(v)) return "$0";
+    if (v >= 1e9) return `$${(v/1e9).toFixed(2)}B`;
+    if (v >= 1e6) return `$${(v/1e6).toFixed(2)}M`;
+    if (v >= 1e3) return `$${(v/1e3).toFixed(2)}K`;
+    return `$${v.toFixed(0)}`;
+  }
+
+  function pct(n){
+    const v = Number(n);
+    if (!Number.isFinite(v)) return "0%";
+    const sign = v > 0 ? "+" : "";
+    return `${sign}${v.toFixed(2)}%`;
+  }
+
+  function panicLabel(level){
+    return ["Asleep","Twitching","Sweaty","Redline","Full Panic"][level] || "Asleep";
+  }
+
+  function levelFromScore(score){
+    if (score < 20) return 0;
+    if (score < 40) return 1;
+    if (score < 60) return 2;
+    if (score < 80) return 3;
+    return 4;
+  }
+
+  function normLog(x, min, max){
+    const v = Math.max(0, Number(x || 0));
+    const l = Math.log10(v + 1);
+    const lmin = Math.log10(min + 1);
+    const lmax = Math.log10(max + 1);
+    if (lmax === lmin) return 0;
+    return clamp((l - lmin) / (lmax - lmin), 0, 1);
+  }
+
+  function isUSDCQuote(pair){
+    const q = pair?.quoteToken?.symbol?.toUpperCase?.() || "";
+    return q === "USDC";
+  }
+
+  function scorePair(p){
+    const liq = Number(p?.liquidity?.usd || 0);
+    const vol24 = Number(p?.volume?.h24 || 0);
+
+    const ch1 = Number(p?.priceChange?.h1 || 0);
+    const ch6 = Number(p?.priceChange?.h6 || 0);
+    const ch24 = Number(p?.priceChange?.h24 || 0);
+
+    const liqN = normLog(liq, 5_000, 2_000_000);
+    const volN = normLog(vol24, 20_000, 20_000_000);
+
+    const momRaw = (ch1 * 0.55) + (ch6 * 0.35) + (ch24 * 0.10);
+    const momN = clamp((momRaw + 20) / 80, 0, 1);
+
+    let score = (volN * 0.48 + liqN * 0.37 + momN * 0.15) * 100;
+
+    if (liq < 20_000) score *= 0.25;
+    else if (liq < 50_000) score *= 0.65;
+
+    return clamp(score, 0, 100);
+  }
+
+  function loadCache(){
+    try {
+      const raw = localStorage.getItem(RADAR_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveCache(cache){
+    try { localStorage.setItem(RADAR_KEY, JSON.stringify(cache)); } catch {}
+  }
+
+  function prune(cache){
+    const cutoff = Date.now() - RADAR_WINDOW_MS;
+    for (const k of Object.keys(cache)) {
+      if (!cache[k]?.ts || cache[k].ts < cutoff) delete cache[k];
+    }
+    return cache;
+  }
+
+  function itemsFromCache(cache){
+    const arr = [];
+    for (const k of Object.keys(cache)) {
+      const it = cache[k]?.item;
+      if (it) arr.push(it);
+    }
+    return arr;
+  }
+
+  function sortRadar(items){
+    // USDC-first, then highest score
+    return items.sort((a,b) => {
+      const aU = a.usdcQuote ? 1 : 0;
+      const bU = b.usdcQuote ? 1 : 0;
+      if (aU !== bU) return bU - aU;
+      return (b.score - a.score);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function rowHTML(it){
+    const lvl = it.panicLevel;
+    const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
+
+    return `
+      <div class="radarRow">
+        <div class="radarRow__left">
+          <div class="radarName">${escapeHtml(it.name)}</div>
+          <div class="radarMeta">${escapeHtml(meta)}</div>
+        </div>
+        <div class="radarRow__right">
+          <span class="panicBadge panic${lvl}" title="${escapeHtml(panicLabel(lvl))}">${lvl}</span>
+          <a class="radarBtnLink" href="${escapeHtml(it.url)}" target="_blank" rel="noreferrer">View</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function render(items){
+    if (!radarExists()) return;
+
+    const list = $("radarList");
+    const best = $("radarBest");
+
+    if (!items || items.length === 0) {
+      list.innerHTML = `<div class="muted small">Radar is asleep. Hit Refresh.</div>`;
+      best.textContent = "—";
+      return;
+    }
+
+    const top = items[0];
+    best.textContent = `${top.name} (Panic ${top.panicLevel} — ${panicLabel(top.panicLevel)})`;
+    list.innerHTML = items.slice(0,5).map(rowHTML).join("");
+  }
+
+  async function fetchJSON(url, timeoutMs = 12000){
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))); }
+
+  function chunk(arr, size){
+    const out = [];
+    for (let i=0; i<arr.length; i+=size) out.push(arr.slice(i,i+size));
+    return out;
+  }
+
+  function normalizePair(pair){
+    const baseSym = pair?.baseToken?.symbol || "TOKEN";
+    const quoteSym = pair?.quoteToken?.symbol || "PAIR";
+    const name = `${baseSym}/${quoteSym}`;
+
+    const liq = Number(pair?.liquidity?.usd || 0);
+    const vol24 = Number(pair?.volume?.h24 || 0);
+
+    const score = scorePair(pair);
+    const panicLevel = levelFromScore(score);
+
+    return {
+      pairAddress: pair?.pairAddress || "",
+      name,
+      url: pair?.url || "",
+      liquidityUsd: liq,
+      volume24h: vol24,
+      change1h: Number(pair?.priceChange?.h1 || 0),
+      score,
+      panicLevel,
+      usdcQuote: isUSDCQuote(pair),
+      ts: Date.now(),
+    };
+  }
+
+  async function refresh(userTriggered=false){
+    if (!radarExists()) return;
+
+    // show cached immediately
+    let cache = prune(loadCache());
+    saveCache(cache);
+    render(sortRadar(itemsFromCache(cache)));
+
+    if (userTriggered && typeof log === "function") log("RADAR — manual refresh (100Hrs Panic Window)", "hot");
+
+    try {
+      // discovery: boosts top
+      const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
+      const addrs = uniq((Array.isArray(boosts) ? boosts : []).map(x => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 90);
+
+      if (addrs.length === 0) {
+        if (typeof log === "function") log("RADAR — no candidates returned (DexScreener)", "bad");
+        return;
+      }
+
+      // enrich: tokens/v1/solana/<addresses up to 30>
+      const chunks = chunk(addrs, 30);
+      const pairsAll = [];
+
+      for (const c of chunks) {
+        const url = `https://api.dexscreener.com/tokens/v1/solana/${encodeURIComponent(c.join(","))}`;
+        try {
+          const pairs = await fetchJSON(url);
+          if (Array.isArray(pairs)) pairsAll.push(...pairs);
+        } catch (e) {
+          if (typeof log === "function") log("RADAR — partial fetch failed. continuing.", "bad");
+          console.error(e);
+        }
+        await new Promise(r => setTimeout(r, 250));
+      }
+
+      let added = 0;
+      for (const pair of pairsAll) {
+        if (!pair?.pairAddress) continue;
+        const item = normalizePair(pair);
+        cache[item.pairAddress] = { ts: Date.now(), item };
+        added++;
+      }
+
+      cache = prune(cache);
+      saveCache(cache);
+
+      let items = itemsFromCache(cache).filter(it => it.liquidityUsd > 0 && it.volume24h > 0);
+      items = sortRadar(items);
+
+      render(items);
+
+      if (typeof log === "function") {
+        log(`RADAR — updated ${added} pairs · window 100h`, "ok");
+        if (items[0]) {
+          const b = items[0];
+          log(`LOCK — Best Pick: ${b.name} | Panic ${b.panicLevel} (${panicLabel(b.panicLevel)}) | liq ${compactUsd(b.liquidityUsd)} | vol24 ${compactUsd(b.volume24h)}`, "hot");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      if (typeof log === "function") log("RADAR — refresh failed (DexScreener). Try again.", "bad");
+    }
+  }
+
+  function clear(){
+    try { localStorage.removeItem(RADAR_KEY); } catch {}
+    if (typeof log === "function") log("RADAR — cache cleared (100h wiped).", "hot");
+    if (radarExists()) render([]);
+  }
+
+  // Hook buttons safely
+  function init(){
+    if (!radarExists()) return;
+
+    // paint cache on load
+    let cache = prune(loadCache());
+    saveCache(cache);
+    render(sortRadar(itemsFromCache(cache)));
+
+    $("radarRefreshBtn")?.addEventListener("click", () => refresh(true));
+    $("radarClearBtn")?.addEventListener("click", clear);
+
+    // poll quietly
+    refresh(false);
+    setInterval(() => refresh(false), POLL_MS);
+  }
+
+  // init after DOM is ready (but safe even if already ready)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
 
 
