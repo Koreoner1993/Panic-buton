@@ -7,7 +7,6 @@
 
   <meta name="theme-color" content="#000000" />
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
-
   <link rel="stylesheet" href="./css/style.css" />
 </head>
 
@@ -46,15 +45,13 @@
 
     <!-- HERO -->
     <section class="hero">
-
-      <!-- LEFT -->
       <div class="hero__left">
         <h1 class="hero__h1">Panic Button</h1>
         <p class="hero__beta">Beta is live</p>
 
         <p class="hero__p">
           One-page degen trading control panel.
-          <span class="muted">An Experimental Button. $1 micro-trades. Panic anytime.</span>
+          <span class="muted">Experimental. $1 micro-trades. Panic anytime.</span>
         </p>
 
         <div class="hero__status">
@@ -77,14 +74,12 @@
         </p>
       </div>
 
-      <!-- RIGHT -->
       <div class="hero__right">
-
         <!-- BANNER -->
         <div class="bannerFrame">
           <img
             class="bannerImg"
-            src="./assets/panic-bannerr.png"
+            src="./assets/panic-banner.png"
             alt="Panic Button Banner"
           />
           <div class="bannerGlow" aria-hidden="true"></div>
@@ -95,8 +90,12 @@
           <span class="panicBtn__ring" aria-hidden="true"></span>
 
           <span class="panicBtn__cap" aria-hidden="true">
-        
-            </span>
+            <img
+              src="./assets/panic-logo.png"
+              alt="Panic Logo"
+              style="width:64px;height:64px;border-radius:50%;filter:drop-shadow(0 0 10px rgba(0,0,0,.8));"
+            />
+          </span>
 
           <span class="panicBtn__text">PANIC</span>
         </button>
@@ -107,10 +106,10 @@
       </div>
     </section>
 
-    <!-- CONTROL GRID -->
+    <!-- GRID -->
     <section class="grid">
 
-      <!-- WALLET CARD -->
+      <!-- WALLET -->
       <div class="card">
         <h2 class="card__title">Wallet</h2>
 
@@ -130,7 +129,7 @@
         <div class="row small muted">Click address to copy.</div>
       </div>
 
-      <!-- VAULT CARD (USDC) -->
+      <!-- VAULT -->
       <div class="card">
         <h2 class="card__title">Vault (USDC)</h2>
 
@@ -142,7 +141,7 @@
         </div>
 
         <div class="row">
-          <label class="label">Deposit $1 (max $10)</label>
+          <label class="label">Deposit (max $10)</label>
 
           <div class="inputRow">
             <span class="inputPrefix">$</span>
@@ -171,11 +170,11 @@
         </div>
       </div>
 
-      <!-- RADAR — 100Hrs Panic Window (Display Only) -->
+      <!-- RADAR -->
       <div class="card">
-        <h2 class="card__title">RADAR — 100 Hours Panic Window</h2>
+        <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
         <div class="row small muted">
-          USDC pairs first, then Solana pairs. High volume + Thickquidity + momentum.
+          USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.
         </div>
 
         <div class="row">
@@ -199,7 +198,7 @@
         </div>
       </div>
 
-      <!-- AI BOT CARD -->
+      <!-- AI BOT -->
       <div class="card">
         <h2 class="card__title">AI Bot</h2>
 
@@ -238,10 +237,9 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="footer">
       <div class="muted small">
-        Panic is experimental · panic is a meme · This Is Not Financial Advice
+        panic is experimental · panic is a meme · not financial advice
       </div>
     </footer>
 
