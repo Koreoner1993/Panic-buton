@@ -167,10 +167,6 @@ function panic() {
 }
 
 // ---------- wallet provider detection (robust) ----------
-// handles:
-// - window.phantom.solana
-// - window.solana
-// - window.solana.providers (multi-wallet)
 function getSolanaProviderPreferPhantom() {
   const w = window;
   const candidates = [];
@@ -193,58 +189,84 @@ function logProviderDebug() {
     `DEBUG — window.phantom.solana: ${hasPhantom ? "YES" : "NO"} | window.solana: ${hasSolana ? "YES" : "NO"} | providers: ${providersCount}`,
     "hot"
   );
-
-  console.log("window.phantom:", window.phantom);
-  console.log("window.solana:", window.solana);
 }
 
 // ---------- wallet UX ----------
+function copyToClipboardFallback(text) {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-9999px";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 function enableCopyAddress() {
   const addrEl = el("addrText");
   if (!addrEl) return;
 
   addrEl.addEventListener("click", async () => {
     if (!state.pubkey) return;
+
     try {
-      await navigator.clipboard.writeText(state.pubkey);
-      log("WALLET — address copied", "ok");
-    } catch (e) {
-      log("WALLET — copy failed", "bad");
-      console.error(e);
-    }
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(state.pubkey);
+        log("WALLET — address copied ✅", "ok");
+        return;
+      }
+    } catch {}
+
+    const ok = copyToClipboardFallback(state.pubkey);
+    log(ok ? "WALLET — address copied ✅" : "WALLET — copy failed ❗", ok ? "ok" : "bad");
   });
 }
 
-// Phantom/Solana network check (genesis hash)
+// ---------- Network check (RPC fetch, most reliable) ----------
 async function checkNetwork() {
   const statusEl = el("networkStatus");
-  if (!statusEl || !state.provider?.request) return;
+  if (!statusEl) return;
+
+  const MAINNET_HASH = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
+  const RPC = "https://api.mainnet-beta.solana.com";
 
   try {
-    const genesisHash = await state.provider.request({ method: "getGenesisHash" });
-    const MAINNET_HASH = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
+    const res = await fetch(RPC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getGenesisHash" }),
+    });
+    const json = await res.json();
+    const hash = json?.result;
 
-    if (genesisHash === MAINNET_HASH) {
+    if (hash === MAINNET_HASH) {
       statusEl.textContent = "Network: Mainnet";
       statusEl.className = "row small net-ok";
-      log("NETWORK — mainnet detected", "ok");
+      log("NETWORK — mainnet detected ✅", "ok");
     } else {
-      statusEl.textContent = "Network: Not Mainnet";
+      statusEl.textContent = "Network: Unknown";
       statusEl.className = "row small net-warn";
-      log("NETWORK — not mainnet (devnet/testnet?)", "hot");
+      log("NETWORK — unexpected genesis hash", "hot");
     }
   } catch (e) {
     statusEl.textContent = "Network: Unknown";
     statusEl.className = "row small muted";
-    log("NETWORK — unknown (provider did not respond)", "bad");
+    log("NETWORK — unknown (RPC failed)", "bad");
     console.error(e);
   }
 }
 
 function disconnectWallet() {
-  try {
-    state.provider?.disconnect?.();
-  } catch {}
+  try { state.provider?.disconnect?.(); } catch {}
 
   state.pubkey = null;
   state.provider = null;
@@ -265,7 +287,6 @@ function disconnectWallet() {
 // ---------- connect wallet ----------
 async function connectWallet() {
   const provider = getSolanaProviderPreferPhantom();
-
   logProviderDebug();
 
   if (!provider) {
@@ -293,7 +314,6 @@ async function connectWallet() {
     setWalletUIConnected(!!state.pubkey);
     log(`WALLET — connected: <span class="mono">${state.pubkey}</span>`, "ok");
 
-    // network check after connect
     await checkNetwork();
   } catch (e) {
     log("WALLET — connect cancelled or failed.", "bad");
@@ -330,7 +350,6 @@ async function eagerConnectIfTrusted() {
 
 // ---------- boot ----------
 function boot() {
-  // initial UI
   setDemoMode(true);
   setWalletUIConnected(false);
   setPanicLevel(0);
@@ -390,6 +409,8 @@ boot();
   const POLL_MS = 120 * 1000; // 2 minutes (safe)
 
   const $ = (id) => document.getElementById(id);
+
+  let radarIntervalId = null;
 
   function radarExists(){
     return !!$("radarList") && !!$("radarBest");
@@ -494,7 +515,6 @@ boot();
   }
 
   function sortRadar(items){
-    // USDC-first, then highest score
     return items.sort((a,b) => {
       const aU = a.usdcQuote ? 1 : 0;
       const bU = b.usdcQuote ? 1 : 0;
@@ -595,7 +615,6 @@ boot();
   async function refresh(userTriggered=false){
     if (!radarExists()) return;
 
-    // show cached immediately
     let cache = prune(loadCache());
     saveCache(cache);
     render(sortRadar(itemsFromCache(cache)));
@@ -603,7 +622,6 @@ boot();
     if (userTriggered && typeof log === "function") log("RADAR — manual refresh (100Hrs Panic Window)", "hot");
 
     try {
-      // discovery: boosts top
       const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
       const addrs = uniq((Array.isArray(boosts) ? boosts : []).map(x => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 90);
 
@@ -612,7 +630,6 @@ boot();
         return;
       }
 
-      // enrich: tokens/v1/solana/<addresses up to 30>
       const chunks = chunk(addrs, 30);
       const pairsAll = [];
 
@@ -663,11 +680,9 @@ boot();
     if (radarExists()) render([]);
   }
 
-  // Hook buttons safely
   function init(){
     if (!radarExists()) return;
 
-    // paint cache on load
     let cache = prune(loadCache());
     saveCache(cache);
     render(sortRadar(itemsFromCache(cache)));
@@ -675,18 +690,16 @@ boot();
     $("radarRefreshBtn")?.addEventListener("click", () => refresh(true));
     $("radarClearBtn")?.addEventListener("click", clear);
 
-    // poll quietly
     refresh(false);
-    setInterval(() => refresh(false), POLL_MS);
+
+    // ✅ prevent stacking intervals
+    if (radarIntervalId) clearInterval(radarIntervalId);
+    radarIntervalId = setInterval(() => refresh(false), POLL_MS);
   }
 
-  // init after DOM is ready (but safe even if already ready)
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
 })();
-
-
-
