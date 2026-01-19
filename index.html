@@ -134,36 +134,48 @@
         <div class="row small muted">Click address to copy.</div>
       </div>
 
-      <!-- VAULT CARD -->
-      <div class="card">
-        <h2 class="card__title">Vault (USDC)</h2>
+   
+       <!-- VAULT CARD (USDC) -->
+<div class="card">
+  <h2 class="card__title">Vault (USDC)</h2>
 
-        <div class="row">
-          <div class="kv">
-            <div class="k">Vault Balance</div>
-            <div class="v"><span class="mono" id="vaultBalance">$0.00</span></div>
-          </div>
-        </div>
+  <div class="row">
+    <div class="kv">
+      <div class="k">Vault Balance</div>
+      <div class="v"><span class="mono" id="vaultBalance">$0.00</span></div>
+    </div>
+  </div>
 
-        <div class="row">
-          <label class="label">Deposit (max $10)</label>
-          <div class="inputRow">
-            <span class="inputPrefix">$</span>
-            <input class="input" id="depositAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="1.00" />
-            <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
-          </div>
-          <div class="muted small">USDC on Solana. Beta UI only (no tx yet).</div>
-        </div>
+  <div class="row">
+    <label class="label">Deposit (max $10)</label>
 
-        <div class="row btnRow">
-          <button class="btn btn--primary" id="depositBtn">Deposit</button>
-          <button class="btn btn--dim" id="withdrawBtn">Withdraw</button>
-        </div>
+    <div class="inputRow">
+      <span class="inputPrefix">$</span>
+      <input
+        class="input"
+        id="depositAmt"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="1.00"
+      />
+      <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
+    </div>
 
-        <div class="row small muted">
-          Rules enforced: max deposit $10 · $1 trades · one trade
-        </div>
-      </div>
+    <div class="muted small">USDC on Solana. Beta UI only (no tx yet).</div>
+  </div>
+
+  <div class="row btnRow">
+    <button class="btn btn--primary" id="depositBtn" type="button">Deposit</button>
+    <button class="btn btn--dim" id="withdrawBtn" type="button">Withdraw</button>
+  </div>
+
+  <div class="row small muted">
+    Rules enforced: max deposit $10 · $1 trades · one trade
+  </div>
+</div>
+       
 
         <div class="row btnRow">
           <button class="btn btn--ghost" id="radarRefreshBtn">Refresh Radar</button>
