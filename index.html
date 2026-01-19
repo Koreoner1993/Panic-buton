@@ -20,7 +20,7 @@
         <img
           src="./assets/panic-logo.png"
           alt="Panic Button Logo"
-          style="width:18px;height:18px;border-radius:50%;box-shadow:0 0 12px rgba(255,27,27,.6);"
+          class="brand__logo"
         />
         <div class="brand__text">
           <div class="brand__title">PANIC BUTTON</div>
@@ -66,20 +66,22 @@
       </div>
 
       <div class="hero__right">
+        <!-- BANNER -->
         <div class="bannerFrame">
           <img class="bannerImg" src="./assets/panic-banner.png" alt="Panic Button Banner" />
           <div class="bannerGlow" aria-hidden="true"></div>
         </div>
 
+        <!-- LOGO (MOVED OFF THE BUTTON) -->
+        <div class="panicLogoStand">
+          <img src="./assets/panic-logo.png" alt="Panic Logo" />
+          <div class="panicLogoStand__txt">Panic is live.</div>
+        </div>
+
+        <!-- PANIC BUTTON (TEXT ONLY) -->
         <button class="panicBtn" id="panicBtn" aria-label="Panic button" type="button">
           <span class="panicBtn__ring" aria-hidden="true"></span>
-          <span class="panicBtn__cap" aria-hidden="true">
-            <img
-              src="./assets/panic-logo.png"
-              alt="Panic Logo"
-              style="width:64px;height:64px;border-radius:50%;filter:drop-shadow(0 0 10px rgba(0,0,0,.8));"
-            />
-          </span>
+          <span class="panicBtn__cap" aria-hidden="true"></span>
           <span class="panicBtn__text">PANIC</span>
         </button>
 
@@ -144,7 +146,6 @@
       <!-- RADAR -->
       <div class="card">
         <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
-        <div class="row small muted">USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.</div>
 
         <div class="row">
           <div class="kv">
@@ -208,6 +209,7 @@
 
   </main>
 
+  <!-- IMPORTANT: keep this path EXACT -->
   <script src="./js/app.js"></script>
 </body>
 </html>
