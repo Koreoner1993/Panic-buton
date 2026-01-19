@@ -63,8 +63,8 @@
         </div>
 
         <div class="hero__ctaRow">
-          <button class="btn btn--primary" id="connectBtn">Connect Phantom</button>
-          <button class="btn btn--ghost" id="demoBtn">Run Demo</button>
+          <button class="btn btn--primary" id="connectBtn" type="button">Connect Phantom</button>
+          <button class="btn btn--ghost" id="demoBtn" type="button">Run Demo</button>
         </div>
 
         <p class="fineprint">
@@ -91,7 +91,7 @@
         </div>
 
         <!-- PANIC BUTTON -->
-        <button class="panicBtn" id="panicBtn" aria-label="Panic button">
+        <button class="panicBtn" id="panicBtn" aria-label="Panic button" type="button">
           <span class="panicBtn__ring" aria-hidden="true"></span>
 
           <span class="panicBtn__cap" aria-hidden="true">
@@ -126,94 +126,82 @@
         </div>
 
         <div class="row btnRow">
-          <button class="btn btn--primary" id="connectBtn2">Connect Wallet</button>
-          <button class="btn btn--dim" id="disconnectBtn">Disconnect</button>
+          <button class="btn btn--primary" id="connectBtn2" type="button">Connect Wallet</button>
+          <button class="btn btn--dim" id="disconnectBtn" type="button">Disconnect</button>
         </div>
 
         <div class="row small muted" id="networkStatus">Network: —</div>
         <div class="row small muted">Click address to copy.</div>
       </div>
 
-   
-       <!-- VAULT CARD (USDC) -->
-<div class="card">
-  <h2 class="card__title">Vault (USDC)</h2>
+      <!-- VAULT CARD (USDC) -->
+      <div class="card">
+        <h2 class="card__title">Vault (USDC)</h2>
 
-  <div class="row">
-    <div class="kv">
-      <div class="k">Vault Balance</div>
-      <div class="v"><span class="mono" id="vaultBalance">$0.00</span></div>
-    </div>
-  </div>
+        <div class="row">
+          <div class="kv">
+            <div class="k">Vault Balance</div>
+            <div class="v"><span class="mono" id="vaultBalance">$0.00</span></div>
+          </div>
+        </div>
 
-  <div class="row">
-    <label class="label">Deposit (max $10)</label>
+        <div class="row">
+          <label class="label">Deposit (max $10)</label>
 
-    <div class="inputRow">
-      <span class="inputPrefix">$</span>
-      <input
-        class="input"
-        id="depositAmt"
-        type="number"
-        inputmode="decimal"
-        min="0"
-        step="0.01"
-        placeholder="1.00"
-      />
-      <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
-    </div>
+          <div class="inputRow">
+            <span class="inputPrefix">$</span>
+            <input
+              class="input"
+              id="depositAmt"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              placeholder="1.00"
+            />
+            <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
+          </div>
 
-    <div class="muted small">USDC on Solana. Beta UI only (no tx yet).</div>
-  </div>
-
-  <div class="row btnRow">
-    <button class="btn btn--primary" id="depositBtn" type="button">Deposit</button>
-    <button class="btn btn--dim" id="withdrawBtn" type="button">Withdraw</button>
-  </div>
-
-  <div class="row small muted">
-    Rules enforced: max deposit $10 · $1 trades · one trade
-  </div>
-</div>
-       
+          <div class="muted small">USDC on Solana. Beta UI only (no tx yet).</div>
+        </div>
 
         <div class="row btnRow">
-          <button class="btn btn--ghost" id="radarRefreshBtn">Refresh Radar</button>
-          <button class="btn btn--dim" id="radarClearBtn">Clear Cache</button>
+          <button class="btn btn--primary" id="depositBtn" type="button">Deposit</button>
+          <button class="btn btn--dim" id="withdrawBtn" type="button">Withdraw</button>
         </div>
 
         <div class="row small muted">
-          “Asleep → Twitching → Sweaty → Redline → Full Panic”
+          Rules enforced: max deposit $10 · $1 trades · one trade
         </div>
       </div>
 
-       <!-- RADAR — 100Hrs Panic Window (Display Only) -->
-<div class="card">
-  <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
-  <div class="row small muted">
-    USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.
-  </div>
+      <!-- RADAR — 100Hrs Panic Window (Display Only) -->
+      <div class="card">
+        <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
+        <div class="row small muted">
+          USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.
+        </div>
 
-  <div class="row">
-    <div class="kv">
-      <div class="k">Best Pick (100h)</div>
-      <div class="v" id="radarBest">—</div>
-    </div>
-  </div>
+        <div class="row">
+          <div class="kv">
+            <div class="k">Best Pick (100h)</div>
+            <div class="v" id="radarBest">—</div>
+          </div>
+        </div>
 
-  <div class="row">
-    <div class="radarList" id="radarList"></div>
-  </div>
+        <div class="row">
+          <div class="radarList" id="radarList"></div>
+        </div>
 
-  <div class="row btnRow">
-    <button class="btn btn--ghost" id="radarRefreshBtn" type="button">Refresh Radar</button>
-    <button class="btn btn--dim" id="radarClearBtn" type="button">Clear Cache</button>
-  </div>
+        <div class="row btnRow">
+          <button class="btn btn--ghost" id="radarRefreshBtn" type="button">Refresh Radar</button>
+          <button class="btn btn--dim" id="radarClearBtn" type="button">Clear Cache</button>
+        </div>
 
-  <div class="row small muted">
-    Levels: Asleep → Twitching → Sweaty → Redline → Full Panic
-  </div>
-</div>
+        <div class="row small muted">
+          Levels: Asleep → Twitching → Sweaty → Redline → Full Panic
+        </div>
+      </div>
 
       <!-- AI BOT CARD -->
       <div class="card">
@@ -233,12 +221,12 @@
         </div>
 
         <div class="row btnRow">
-          <button class="btn btn--primary" id="startBtn">Start</button>
-          <button class="btn btn--dim" id="stopBtn">Stop</button>
+          <button class="btn btn--primary" id="startBtn" type="button">Start</button>
+          <button class="btn btn--dim" id="stopBtn" type="button">Stop</button>
         </div>
 
         <div class="row small muted">
-          Bot uses Radar picks (no newborns). Panic anytime.
+          Bot is demo. Radar is display-only.
         </div>
       </div>
 
