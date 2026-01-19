@@ -460,3 +460,86 @@ input[type="range"]{width:100%}
   font-weight:1000;
 }
 
+/* ===== RADAR (100Hrs Panic Window) ===== */
+.radarList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:6px;
+}
+
+.radarRow{
+  display:grid;
+  grid-template-columns: 1.2fr .7fr;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+}
+
+.radarRow__left{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+
+.radarName{
+  font-weight:1000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.radarMeta{
+  font-size:12px;
+  color: rgba(255,255,255,.72);
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.radarRow__right{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  align-items:center;
+}
+
+.panicBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:34px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:1000;
+  font-size:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+}
+
+.panic0{ opacity:.6; }
+.panic1{ border-color: rgba(255,255,255,.22); }
+.panic2{ border-color: rgba(255,210,122,.40); background: rgba(255,210,122,.10); }
+.panic3{ border-color: rgba(255,27,27,.45); background: rgba(255,27,27,.10); }
+.panic4{ border-color: rgba(255,27,27,.70); background: rgba(255,27,27,.18); box-shadow: 0 0 24px rgba(255,27,27,.25); }
+
+.radarBtnLink{
+  text-decoration:none;
+  font-weight:1000;
+  font-size:12px;
+  color:#fff;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+}
+.radarBtnLink:hover{
+  border-color: rgba(255,27,27,.35);
+  background: rgba(255,27,27,.08);
+}
+
+#radarBest{ font-weight:1000; }
