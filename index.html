@@ -7,7 +7,6 @@
 
   <meta name="theme-color" content="#000000" />
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
-
   <link rel="stylesheet" href="./css/style.css" />
 </head>
 
@@ -17,7 +16,6 @@
   <!-- TOP BAR -->
   <header class="topbar">
     <div class="topbar__inner">
-
       <div class="brand">
         <img
           src="./assets/panic-logo.png"
@@ -31,14 +29,9 @@
       </div>
 
       <nav class="links">
-        <a class="link" href="https://x.com/PanicButtonton" target="_blank" rel="noreferrer">
-          @PanicButtonton
-        </a>
-        <a class="link link--outline" href="https://x.com/i/communities/2010590489972469792" target="_blank" rel="noreferrer">
-          Community
-        </a>
+        <a class="link" href="https://x.com/PanicButtonton" target="_blank" rel="noreferrer">@PanicButtonton</a>
+        <a class="link link--outline" href="https://x.com/i/communities/2010590489972469792" target="_blank" rel="noreferrer">Community</a>
       </nav>
-
     </div>
   </header>
 
@@ -46,8 +39,6 @@
 
     <!-- HERO -->
     <section class="hero">
-
-      <!-- LEFT -->
       <div class="hero__left">
         <h1 class="hero__h1">Panic Button</h1>
         <p class="hero__beta">Beta is live</p>
@@ -69,31 +60,19 @@
 
         <p class="fineprint">
           Beta rules:
-          <b>$10 max deposit</b>,
-          <b>$1 per trade</b>,
-          <b>one trade at a time</b>,
-          <b>auto-stop +65%</b>.
+          <b>$10 max deposit</b>, <b>$1 per trade</b>, <b>one trade at a time</b>, <b>auto-stop +65%</b>.
           <span class="muted">No promises.</span>
         </p>
       </div>
 
-      <!-- RIGHT -->
       <div class="hero__right">
-
-        <!-- BANNER -->
         <div class="bannerFrame">
-          <img
-            class="bannerImg"
-            src="./assets/panic-banner.png"
-            alt="Panic Button Banner"
-          />
+          <img class="bannerImg" src="./assets/panic-banner.png" alt="Panic Button Banner" />
           <div class="bannerGlow" aria-hidden="true"></div>
         </div>
 
-        <!-- PANIC BUTTON -->
         <button class="panicBtn" id="panicBtn" aria-label="Panic button" type="button">
           <span class="panicBtn__ring" aria-hidden="true"></span>
-
           <span class="panicBtn__cap" aria-hidden="true">
             <img
               src="./assets/panic-logo.png"
@@ -101,20 +80,17 @@
               style="width:64px;height:64px;border-radius:50%;filter:drop-shadow(0 0 10px rgba(0,0,0,.8));"
             />
           </span>
-
           <span class="panicBtn__text">PANIC</span>
         </button>
 
-        <div class="hint">
-          Rugpull yourself before the market does.
-        </div>
+        <div class="hint">Rugpull yourself before the market does.</div>
       </div>
     </section>
 
-    <!-- CONTROL GRID -->
+    <!-- GRID -->
     <section class="grid">
 
-      <!-- WALLET CARD -->
+      <!-- WALLET -->
       <div class="card">
         <h2 class="card__title">Wallet</h2>
 
@@ -134,7 +110,7 @@
         <div class="row small muted">Click address to copy.</div>
       </div>
 
-      <!-- VAULT CARD (USDC) -->
+      <!-- VAULT -->
       <div class="card">
         <h2 class="card__title">Vault (USDC)</h2>
 
@@ -150,19 +126,11 @@
 
           <div class="inputRow">
             <span class="inputPrefix">$</span>
-            <input
-              class="input"
-              id="depositAmt"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="0.01"
-              placeholder="1.00"
-            />
+            <input class="input" id="depositAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="1.00" />
             <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
           </div>
 
-          <div class="muted small">USDC on Solana. Beta UI only (no tx yet).</div>
+          <div class="muted small">Beta UI only (no tx yet).</div>
         </div>
 
         <div class="row btnRow">
@@ -170,17 +138,13 @@
           <button class="btn btn--dim" id="withdrawBtn" type="button">Withdraw</button>
         </div>
 
-        <div class="row small muted">
-          Rules enforced: max deposit $10 · $1 trades · one trade
-        </div>
+        <div class="row small muted">Rules: max $10 · $1 trades · one at a time</div>
       </div>
 
-      <!-- RADAR — 100Hrs Panic Window (Display Only) -->
+      <!-- RADAR -->
       <div class="card">
         <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
-        <div class="row small muted">
-          USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.
-        </div>
+        <div class="row small muted">USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.</div>
 
         <div class="row">
           <div class="kv">
@@ -198,12 +162,10 @@
           <button class="btn btn--dim" id="radarClearBtn" type="button">Clear Cache</button>
         </div>
 
-        <div class="row small muted">
-          Levels: Asleep → Twitching → Sweaty → Redline → Full Panic
-        </div>
+        <div class="row small muted">Levels: Asleep → Twitching → Sweaty → Redline → Full Panic</div>
       </div>
 
-      <!-- AI BOT CARD -->
+      <!-- AI BOT -->
       <div class="card">
         <h2 class="card__title">AI Bot</h2>
 
@@ -225,9 +187,7 @@
           <button class="btn btn--dim" id="stopBtn" type="button">Stop</button>
         </div>
 
-        <div class="row small muted">
-          Bot is demo. Radar is display-only.
-        </div>
+        <div class="row small muted">Bot is demo. Radar is display-only.</div>
       </div>
 
     </section>
@@ -242,11 +202,8 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="footer">
-      <div class="muted small">
-        panic is experimental · panic is a meme · not financial advice
-      </div>
+      <div class="muted small">panic is experimental · panic is a meme · not financial advice</div>
     </footer>
 
   </main>
