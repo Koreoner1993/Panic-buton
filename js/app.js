@@ -1,11 +1,9 @@
 // Panic Button — Wallet + Vault (USDC demo) + Demo Bot + Radar (100Hrs display)
 // Safe: no transactions, no real swaps. UI + simulated behavior only.
 
-// ---------- helpers ----------
 const el = (id) => document.getElementById(id);
 
 const state = {
-  // bot
   demo: true,
   running: false,
   panicLevel: 0,
@@ -14,11 +12,10 @@ const state = {
   profitPct: 0,
   halted: false,
 
-  // wallet
   provider: null,
   pubkey: null,
 
-  // vault (SIMULATED)
+  // Vault (SIMULATED)
   vaultUSDC: 0,
   maxVaultUSDC: 10,
   tradeSizeUSDC: 1,
@@ -26,6 +23,9 @@ const state = {
 };
 
 function now() { return new Date().toLocaleTimeString(); }
+function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+function shortAddr(a) { return a ? `${a.slice(0, 4)}…${a.slice(-4)}` : "—"; }
+function money(n) { const v = Number.isFinite(n) ? n : 0; return `$${v.toFixed(2)}`; }
 
 function log(msg, cls = "") {
   const box = el("log");
@@ -37,42 +37,22 @@ function log(msg, cls = "") {
   box.scrollTop = box.scrollHeight;
 }
 
-function shortAddr(a) {
-  if (!a) return "—";
-  return `${a.slice(0, 4)}…${a.slice(-4)}`;
-}
-
-function money(n) {
-  const v = Number.isFinite(n) ? n : 0;
-  return `$${v.toFixed(2)}`;
-}
-
-function clamp(n, min, max) {
-  return Math.max(min, Math.min(max, n));
-}
-
-// ---------- UI setters ----------
+// ---------- UI ----------
 function setWalletUIConnected(connected) {
-  const walletPill = el("walletPill");
-  const addrText = el("addrText");
-  const modePill = el("modePill");
-
-  if (walletPill) walletPill.textContent = connected ? "Wallet: Connected" : "Wallet: Not Connected";
-  if (addrText) addrText.textContent = connected ? shortAddr(state.pubkey) : "—";
-  if (modePill) modePill.textContent = state.demo ? "Mode: Demo" : "Mode: Live";
+  el("walletPill") && (el("walletPill").textContent = connected ? "Wallet: Connected" : "Wallet: Not Connected");
+  el("addrText") && (el("addrText").textContent = connected ? shortAddr(state.pubkey) : "—");
+  el("modePill") && (el("modePill").textContent = state.demo ? "Mode: Demo" : "Mode: Live");
 }
 
 function setDemoMode(on) {
   state.demo = on;
-  const modePill = el("modePill");
-  if (modePill) modePill.textContent = on ? "Mode: Demo" : "Mode: Live";
+  el("modePill") && (el("modePill").textContent = on ? "Mode: Demo" : "Mode: Live");
   log(on ? "DEMO enabled (simulated scanning + trades)" : "LIVE selected (connected wallet; trades still simulated)", "hot");
 }
 
 function setPanicLevel(n) {
   state.panicLevel = n;
-  const pl = el("panicLevel");
-  if (pl) pl.textContent = String(n);
+  el("panicLevel") && (el("panicLevel").textContent = String(n));
 
   const btn = el("panicBtn");
   if (!btn) return;
@@ -85,36 +65,23 @@ function setPanicLevel(n) {
   else btn.classList.remove("is-hot");
 }
 
-// ---------- Vault UI + logic (SIM) ----------
+// ---------- Vault (SIM) ----------
 function setVaultUI() {
-  const bal = el("vaultBalance");
-  if (bal) bal.textContent = money(state.vaultUSDC);
+  el("vaultBalance") && (el("vaultBalance").textContent = money(state.vaultUSDC));
 
-  const canUseVault = !!state.pubkey;
-
-  const depositBtn = el("depositBtn");
-  const withdrawBtn = el("withdrawBtn");
-  const maxBtn = el("maxDepositBtn");
-  const depositAmt = el("depositAmt");
-
-  // enable/disable
-  if (depositBtn) depositBtn.disabled = !canUseVault;
-  if (withdrawBtn) withdrawBtn.disabled = !canUseVault;
-  if (maxBtn) maxBtn.disabled = !canUseVault;
-  if (depositAmt) depositAmt.disabled = !canUseVault;
-
-  // opacity (nice UX)
-  const op = canUseVault ? "1" : ".55";
-  if (depositBtn) depositBtn.style.opacity = op;
-  if (withdrawBtn) withdrawBtn.style.opacity = op;
-  if (maxBtn) maxBtn.style.opacity = op;
-  if (depositAmt) depositAmt.style.opacity = op;
+  const can = !!state.pubkey;
+  const ids = ["depositAmt", "maxDepositBtn", "depositBtn", "withdrawBtn"];
+  for (const id of ids) {
+    const n = el(id);
+    if (!n) continue;
+    n.disabled = !can;
+    n.style.opacity = can ? "1" : ".55";
+  }
 }
 
 function getDepositInput() {
   const raw = Number(el("depositAmt")?.value || 0);
-  if (!Number.isFinite(raw)) return 0;
-  return raw;
+  return Number.isFinite(raw) ? raw : 0;
 }
 
 function setDepositInput(val) {
@@ -128,44 +95,26 @@ function maxDepositRemaining() {
 }
 
 function depositUSDC() {
-  if (!state.pubkey) {
-    log("VAULT — connect wallet first.", "bad");
-    return;
-  }
+  if (!state.pubkey) return log("VAULT — connect wallet first.", "bad");
 
   const amt = getDepositInput();
-  if (!(amt > 0)) {
-    log("VAULT — enter deposit amount.", "bad");
-    return;
-  }
+  if (!(amt > 0)) return log("VAULT — enter deposit amount.", "bad");
 
-  const remaining = maxDepositRemaining();
-  if (remaining <= 0) {
-    log("VAULT — max deposit reached ($10).", "bad");
-    return;
-  }
+  const rem = maxDepositRemaining();
+  if (rem <= 0) return log("VAULT — max deposit reached ($10).", "bad");
 
-  const add = Math.min(amt, remaining);
+  const add = Math.min(amt, rem);
   state.vaultUSDC = +(state.vaultUSDC + add).toFixed(2);
 
   setVaultUI();
   log(`VAULT — deposited ${money(add)} (vault now ${money(state.vaultUSDC)})`, "ok");
 
-  if (amt > remaining) {
-    log(`VAULT — capped at $10 (ignored extra ${money(amt - remaining)})`, "hot");
-  }
+  if (amt > rem) log(`VAULT — capped at $10 (ignored extra ${money(amt - rem)})`, "hot");
 }
 
 function withdrawUSDC() {
-  if (!state.pubkey) {
-    log("VAULT — connect wallet first.", "bad");
-    return;
-  }
-
-  if (state.vaultUSDC <= 0) {
-    log("VAULT — nothing to withdraw.", "bad");
-    return;
-  }
+  if (!state.pubkey) return log("VAULT — connect wallet first.", "bad");
+  if (state.vaultUSDC <= 0) return log("VAULT — nothing to withdraw.", "bad");
 
   const out = state.vaultUSDC;
   state.vaultUSDC = 0;
@@ -173,7 +122,7 @@ function withdrawUSDC() {
   log(`VAULT — withdrew ${money(out)} (vault now ${money(state.vaultUSDC)})`, "ok");
 }
 
-// ---------- bot controls ----------
+// ---------- Bot (SIM) ----------
 function stopBot(reason = "Stopped") {
   if (state.timer) clearInterval(state.timer);
   state.timer = null;
@@ -185,7 +134,6 @@ function stopBot(reason = "Stopped") {
 function startBot() {
   if (state.running) return;
 
-  // require vault >= $1
   if (state.vaultUSDC < state.tradeSizeUSDC) {
     log(`BOT — need at least ${money(state.tradeSizeUSDC)} in vault to trade.`, "bad");
     return;
@@ -220,9 +168,7 @@ function scorePanic() {
   return 4;
 }
 
-function quoteOk() {
-  return Math.random() > 0.2;
-}
+function quoteOk() { return Math.random() > 0.2; }
 
 function tick() {
   if (!state.running || state.halted) return;
@@ -230,14 +176,10 @@ function tick() {
   const token = randomToken();
   const lvl = scorePanic();
   setPanicLevel(lvl);
-
   log(`NEW — ${token} → Panic ${lvl}`, "hot");
 
   if (lvl >= 3) {
-    if (state.activeTrade) {
-      log("BOT — one trade at a time. waiting.", "hot");
-      return;
-    }
+    if (state.activeTrade) return log("BOT — one trade at a time. waiting.", "hot");
 
     if (state.vaultUSDC < state.tradeSizeUSDC) {
       log(`BOT — vault too low (${money(state.vaultUSDC)}). deposit more.`, "bad");
@@ -245,12 +187,8 @@ function tick() {
       return;
     }
 
-    if (!quoteOk()) {
-      log("QUOTE — $1 USDC route looks trash. skip.", "bad");
-      return;
-    }
+    if (!quoteOk()) return log("QUOTE — $1 USDC route looks trash. skip.", "bad");
 
-    // simulate trade: subtract $1 then add back with pnl
     state.activeTrade = true;
 
     state.vaultUSDC = +(state.vaultUSDC - state.tradeSizeUSDC).toFixed(2);
@@ -258,7 +196,7 @@ function tick() {
     log(`TRADE — spent ${money(state.tradeSizeUSDC)} USDC on ${token}`, "ok");
 
     setTimeout(() => {
-      const pnlPct = (Math.random() * 8 - 3); // -3% to +5%
+      const pnlPct = (Math.random() * 8 - 3);
       const returned = +(state.tradeSizeUSDC * (1 + pnlPct / 100)).toFixed(2);
 
       state.vaultUSDC = +(state.vaultUSDC + returned).toFixed(2);
@@ -272,10 +210,10 @@ function tick() {
       if (state.profitPct >= 65) {
         stopBot("AUTO-STOP hit +65% (simulated).");
         state.halted = true;
-        const btn = el("panicBtn");
-        if (btn) {
-          btn.classList.remove("is-hot");
-          btn.classList.add("is-cooled");
+        const b = el("panicBtn");
+        if (b) {
+          b.classList.remove("is-hot");
+          b.classList.add("is-cooled");
         }
         log("AUTO — cooled down.", "hot");
       }
@@ -283,7 +221,6 @@ function tick() {
   }
 }
 
-// ---------- PANIC ----------
 function panic() {
   stopBot("PANIC BUTTON PRESSED — rugged yourself.");
   state.halted = true;
@@ -297,11 +234,10 @@ function panic() {
   log("PANIC — bot halted. (cooled down)", "bad");
 }
 
-// ---------- wallet provider detection ----------
+// ---------- Wallet ----------
 function getSolanaProviderPreferPhantom() {
   const w = window;
   const candidates = [];
-
   if (w?.phantom?.solana) candidates.push(w.phantom.solana);
   if (w?.solana) candidates.push(w.solana);
   if (Array.isArray(w?.solana?.providers)) candidates.push(...w.solana.providers);
@@ -311,7 +247,6 @@ function getSolanaProviderPreferPhantom() {
   return phantom || filtered[0] || null;
 }
 
-// ---------- copy address (reliable) ----------
 function copyToClipboardFallback(text) {
   try {
     const ta = document.createElement("textarea");
@@ -351,7 +286,6 @@ function enableCopyAddress() {
   });
 }
 
-// ---------- Network check (RPC fetch) ----------
 async function checkNetwork() {
   const statusEl = el("networkStatus");
   if (!statusEl) return;
@@ -385,7 +319,6 @@ async function checkNetwork() {
   }
 }
 
-// ---------- wallet connect/disconnect ----------
 function disconnectWallet() {
   try { state.provider?.disconnect?.(); } catch {}
 
@@ -469,7 +402,7 @@ async function eagerConnectIfTrusted() {
   }
 }
 
-// ---------- boot ----------
+// ---------- Boot ----------
 function boot() {
   setDemoMode(true);
   setWalletUIConnected(false);
@@ -480,14 +413,11 @@ function boot() {
   if (slider) {
     const v = Number(slider.value || 90);
     state.cooldownSec = v;
-    const cv = el("cooldownVal");
-    if (cv) cv.textContent = String(v);
+    el("cooldownVal") && (el("cooldownVal").textContent = String(v));
 
     slider.addEventListener("input", (e) => {
       state.cooldownSec = Number(e.target.value);
-      const cv2 = el("cooldownVal");
-      if (cv2) cv2.textContent = String(state.cooldownSec);
-
+      el("cooldownVal") && (el("cooldownVal").textContent = String(state.cooldownSec));
       if (state.running) {
         stopBot("cooldown changed — restarting");
         startBot();
@@ -495,16 +425,17 @@ function boot() {
     });
   }
 
-  // wallet + bot + panic
+  // wallet
   el("connectBtn")?.addEventListener("click", connectWallet);
   el("connectBtn2")?.addEventListener("click", connectWallet);
   el("disconnectBtn")?.addEventListener("click", disconnectWallet);
 
+  // demo
   el("demoBtn")?.addEventListener("click", () => setDemoMode(true));
 
+  // bot
   el("startBtn")?.addEventListener("click", startBot);
   el("stopBtn")?.addEventListener("click", () => stopBot("Stopped by user"));
-
   el("panicBtn")?.addEventListener("click", panic);
 
   // vault
@@ -520,11 +451,9 @@ function boot() {
   enableCopyAddress();
 
   log("BOOT — connect wallet → deposit up to $10 → START. PANIC halts everything.", "hot");
-
   eagerConnectIfTrusted();
 }
 
-// guaranteed boot
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", boot);
 } else {
@@ -533,10 +462,7 @@ if (document.readyState === "loading") {
 
 /* =========================
    RADAR — 100Hrs Panic Window (DISPLAY ONLY)
-   DexScreener polling + localStorage cache
-   Does NOT affect bot logic.
 ========================= */
-
 (function RadarDisplayOnly(){
   const HOUR = 60 * 60 * 1000;
   const RADAR_WINDOW_MS = 100 * HOUR;
@@ -544,12 +470,13 @@ if (document.readyState === "loading") {
   const POLL_MS = 120 * 1000;
 
   const $ = (id) => document.getElementById(id);
-
   let radarIntervalId = null;
 
   function radarExists(){
     return !!$("radarList") && !!$("radarBest");
   }
+
+  function clamp2(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
   function compactUsd(n){
     const v = Number(n || 0);
@@ -578,8 +505,6 @@ if (document.readyState === "loading") {
     if (score < 80) return 3;
     return 4;
   }
-
-  function clamp2(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
   function normLog(x, min, max){
     const v = Math.max(0, Number(x || 0));
@@ -714,7 +639,6 @@ if (document.readyState === "loading") {
   }
 
   function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))); }
-
   function chunk(arr, size){
     const out = [];
     for (let i=0; i<arr.length; i+=size) out.push(arr.slice(i,i+size));
@@ -741,4 +665,39 @@ if (document.readyState === "loading") {
       change1h: Number(pair?.priceChange?.h1 || 0),
       score,
       panicLevel,
-      usdcQuote: isUSDCQuot
+      usdcQuote: isUSDCQuote(pair),
+      ts: Date.now(),
+    };
+  }
+
+  async function refresh(userTriggered=false){
+    if (!radarExists()) return;
+
+    let cache = prune(loadCache());
+    saveCache(cache);
+    render(sortRadar(itemsFromCache(cache)));
+
+    if (userTriggered && typeof log === "function") log("RADAR — manual refresh (100Hrs Panic Window)", "hot");
+
+    try {
+      const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
+      const addrs = uniq((Array.isArray(boosts) ? boosts : []).map(x => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 90);
+
+      if (addrs.length === 0) {
+        if (typeof log === "function") log("RADAR — no candidates returned (DexScreener)", "bad");
+        return;
+      }
+
+      const chunks = chunk(addrs, 30);
+      const pairsAll = [];
+
+      for (const c of chunks) {
+        const url = `https://api.dexscreener.com/tokens/v1/solana/${encodeURIComponent(c.join(","))}`;
+        try {
+          const pairs = await fetchJSON(url);
+          if (Array.isArray(pairs)) pairsAll.push(...pairs);
+        } catch (e) {
+          if (typeof log === "function") log("RADAR — partial fetch failed. continuing.", "bad");
+          console.error(e);
+        }
+        aw
