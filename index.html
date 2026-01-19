@@ -195,6 +195,34 @@
         </div>
       </div>
 
+       <!-- RADAR — 100Hrs Panic Window (Display Only) -->
+<div class="card">
+  <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
+  <div class="row small muted">
+    USDC pairs first, then any Solana pairs. High volume + thick liquidity + momentum.
+  </div>
+
+  <div class="row">
+    <div class="kv">
+      <div class="k">Best Pick (100h)</div>
+      <div class="v" id="radarBest">—</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="radarList" id="radarList"></div>
+  </div>
+
+  <div class="row btnRow">
+    <button class="btn btn--ghost" id="radarRefreshBtn" type="button">Refresh Radar</button>
+    <button class="btn btn--dim" id="radarClearBtn" type="button">Clear Cache</button>
+  </div>
+
+  <div class="row small muted">
+    Levels: Asleep → Twitching → Sweaty → Redline → Full Panic
+  </div>
+</div>
+
       <!-- AI BOT CARD -->
       <div class="card">
         <h2 class="card__title">AI Bot</h2>
