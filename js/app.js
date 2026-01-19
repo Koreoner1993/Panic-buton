@@ -1,25 +1,31 @@
-// Panic Button — Demo Bot + Wallet Connect (Phantom) + Wallet UX polish
-// Safe: no transactions, no real swaps. Connect wallet + simulate bot behavior.
+// Panic Button — Wallet + Vault (USDC demo) + Demo Bot + Radar (100Hrs display)
+// Safe: no transactions, no real swaps. UI + simulated behavior only.
 
 // ---------- helpers ----------
 const el = (id) => document.getElementById(id);
 
 const state = {
+  // bot
   demo: true,
   running: false,
   panicLevel: 0,
   cooldownSec: 90,
   timer: null,
-  profitPct: 0,     // simulated
-  halted: false,    // cooled down after PANIC / auto-stop
+  profitPct: 0,
+  halted: false,
 
-  provider: null,   // detected Solana wallet provider
-  pubkey: null,     // connected address string
+  // wallet
+  provider: null,
+  pubkey: null,
+
+  // vault (SIMULATED)
+  vaultUSDC: 0,
+  maxVaultUSDC: 10,
+  tradeSizeUSDC: 1,
+  activeTrade: false,
 };
 
-function now() {
-  return new Date().toLocaleTimeString();
-}
+function now() { return new Date().toLocaleTimeString(); }
 
 function log(msg, cls = "") {
   const box = el("log");
@@ -36,15 +42,23 @@ function shortAddr(a) {
   return `${a.slice(0, 4)}…${a.slice(-4)}`;
 }
 
+function money(n) {
+  const v = Number.isFinite(n) ? n : 0;
+  return `$${v.toFixed(2)}`;
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
 // ---------- UI setters ----------
 function setWalletUIConnected(connected) {
   const walletPill = el("walletPill");
   const addrText = el("addrText");
+  const modePill = el("modePill");
 
   if (walletPill) walletPill.textContent = connected ? "Wallet: Connected" : "Wallet: Not Connected";
   if (addrText) addrText.textContent = connected ? shortAddr(state.pubkey) : "—";
-
-  const modePill = el("modePill");
   if (modePill) modePill.textContent = state.demo ? "Mode: Demo" : "Mode: Live";
 }
 
@@ -60,7 +74,6 @@ function setPanicLevel(n) {
   const pl = el("panicLevel");
   if (pl) pl.textContent = String(n);
 
-  // Pulse panic button when >= 3, unless cooled down (halted)
   const btn = el("panicBtn");
   if (!btn) return;
 
@@ -72,18 +85,112 @@ function setPanicLevel(n) {
   else btn.classList.remove("is-hot");
 }
 
+// ---------- Vault UI + logic (SIM) ----------
+function setVaultUI() {
+  const bal = el("vaultBalance");
+  if (bal) bal.textContent = money(state.vaultUSDC);
+
+  const canUseVault = !!state.pubkey;
+
+  const depositBtn = el("depositBtn");
+  const withdrawBtn = el("withdrawBtn");
+  const maxBtn = el("maxDepositBtn");
+  const depositAmt = el("depositAmt");
+
+  // enable/disable
+  if (depositBtn) depositBtn.disabled = !canUseVault;
+  if (withdrawBtn) withdrawBtn.disabled = !canUseVault;
+  if (maxBtn) maxBtn.disabled = !canUseVault;
+  if (depositAmt) depositAmt.disabled = !canUseVault;
+
+  // opacity (nice UX)
+  const op = canUseVault ? "1" : ".55";
+  if (depositBtn) depositBtn.style.opacity = op;
+  if (withdrawBtn) withdrawBtn.style.opacity = op;
+  if (maxBtn) maxBtn.style.opacity = op;
+  if (depositAmt) depositAmt.style.opacity = op;
+}
+
+function getDepositInput() {
+  const raw = Number(el("depositAmt")?.value || 0);
+  if (!Number.isFinite(raw)) return 0;
+  return raw;
+}
+
+function setDepositInput(val) {
+  const input = el("depositAmt");
+  if (!input) return;
+  input.value = Number(val).toFixed(2);
+}
+
+function maxDepositRemaining() {
+  return clamp(state.maxVaultUSDC - state.vaultUSDC, 0, state.maxVaultUSDC);
+}
+
+function depositUSDC() {
+  if (!state.pubkey) {
+    log("VAULT — connect wallet first.", "bad");
+    return;
+  }
+
+  const amt = getDepositInput();
+  if (!(amt > 0)) {
+    log("VAULT — enter deposit amount.", "bad");
+    return;
+  }
+
+  const remaining = maxDepositRemaining();
+  if (remaining <= 0) {
+    log("VAULT — max deposit reached ($10).", "bad");
+    return;
+  }
+
+  const add = Math.min(amt, remaining);
+  state.vaultUSDC = +(state.vaultUSDC + add).toFixed(2);
+
+  setVaultUI();
+  log(`VAULT — deposited ${money(add)} (vault now ${money(state.vaultUSDC)})`, "ok");
+
+  if (amt > remaining) {
+    log(`VAULT — capped at $10 (ignored extra ${money(amt - remaining)})`, "hot");
+  }
+}
+
+function withdrawUSDC() {
+  if (!state.pubkey) {
+    log("VAULT — connect wallet first.", "bad");
+    return;
+  }
+
+  if (state.vaultUSDC <= 0) {
+    log("VAULT — nothing to withdraw.", "bad");
+    return;
+  }
+
+  const out = state.vaultUSDC;
+  state.vaultUSDC = 0;
+  setVaultUI();
+  log(`VAULT — withdrew ${money(out)} (vault now ${money(state.vaultUSDC)})`, "ok");
+}
+
 // ---------- bot controls ----------
 function stopBot(reason = "Stopped") {
   if (state.timer) clearInterval(state.timer);
   state.timer = null;
   state.running = false;
+  state.activeTrade = false;
   log(`STOP — ${reason}`, "bad");
 }
 
 function startBot() {
   if (state.running) return;
 
-  // un-cool when starting again
+  // require vault >= $1
+  if (state.vaultUSDC < state.tradeSizeUSDC) {
+    log(`BOT — need at least ${money(state.tradeSizeUSDC)} in vault to trade.`, "bad");
+    return;
+  }
+
   state.halted = false;
   const btn = el("panicBtn");
   if (btn) {
@@ -94,11 +201,10 @@ function startBot() {
   state.running = true;
   log(`START — bot running (cooldown ${state.cooldownSec}s)`, "ok");
 
-  tick(); // run once immediately
+  tick();
   state.timer = setInterval(tick, state.cooldownSec * 1000);
 }
 
-// ---------- demo “intel feed” (tokens only) ----------
 function randomToken() {
   const a = ["PANIC", "RUG", "BUTTON", "CHAOS", "SIREN", "DEGEN", "RED", "FOMO", "MINT", "GOD"];
   const b = ["CAT", "DOG", "AI", "COIN", "FROG", "PUMP", "PRINT", "DRAIN", "MOON", "DUST"];
@@ -115,7 +221,7 @@ function scorePanic() {
 }
 
 function quoteOk() {
-  return Math.random() > 0.2; // 80% pass
+  return Math.random() > 0.2;
 }
 
 function tick() {
@@ -128,27 +234,52 @@ function tick() {
   log(`NEW — ${token} → Panic ${lvl}`, "hot");
 
   if (lvl >= 3) {
+    if (state.activeTrade) {
+      log("BOT — one trade at a time. waiting.", "hot");
+      return;
+    }
+
+    if (state.vaultUSDC < state.tradeSizeUSDC) {
+      log(`BOT — vault too low (${money(state.vaultUSDC)}). deposit more.`, "bad");
+      stopBot("Vault empty");
+      return;
+    }
+
     if (!quoteOk()) {
       log("QUOTE — $1 USDC route looks trash. skip.", "bad");
       return;
     }
 
-    // simulate 1 trade
-    const pnl = (Math.random() * 8 - 3).toFixed(2); // -3% to +5%
-    state.profitPct += Number(pnl);
-    log(`TRADE — $1 USDC → ${token} | PnL ${pnl}%`, Number(pnl) >= 0 ? "ok" : "bad");
+    // simulate trade: subtract $1 then add back with pnl
+    state.activeTrade = true;
 
-    // auto-stop at +65% profit (simulated)
-    if (state.profitPct >= 65) {
-      stopBot("AUTO-STOP hit +65% (simulated).");
-      state.halted = true;
-      const btn = el("panicBtn");
-      if (btn) {
-        btn.classList.remove("is-hot");
-        btn.classList.add("is-cooled");
+    state.vaultUSDC = +(state.vaultUSDC - state.tradeSizeUSDC).toFixed(2);
+    setVaultUI();
+    log(`TRADE — spent ${money(state.tradeSizeUSDC)} USDC on ${token}`, "ok");
+
+    setTimeout(() => {
+      const pnlPct = (Math.random() * 8 - 3); // -3% to +5%
+      const returned = +(state.tradeSizeUSDC * (1 + pnlPct / 100)).toFixed(2);
+
+      state.vaultUSDC = +(state.vaultUSDC + returned).toFixed(2);
+      state.profitPct += pnlPct;
+
+      setVaultUI();
+      log(`SETTLE — ${token} returned ${money(returned)} (PnL ${pnlPct.toFixed(2)}%)`, pnlPct >= 0 ? "ok" : "bad");
+
+      state.activeTrade = false;
+
+      if (state.profitPct >= 65) {
+        stopBot("AUTO-STOP hit +65% (simulated).");
+        state.halted = true;
+        const btn = el("panicBtn");
+        if (btn) {
+          btn.classList.remove("is-hot");
+          btn.classList.add("is-cooled");
+        }
+        log("AUTO — cooled down.", "hot");
       }
-      log("AUTO — cooled down.", "hot");
-    }
+    }, 1200);
   }
 }
 
@@ -166,7 +297,7 @@ function panic() {
   log("PANIC — bot halted. (cooled down)", "bad");
 }
 
-// ---------- wallet provider detection (robust) ----------
+// ---------- wallet provider detection ----------
 function getSolanaProviderPreferPhantom() {
   const w = window;
   const candidates = [];
@@ -180,18 +311,7 @@ function getSolanaProviderPreferPhantom() {
   return phantom || filtered[0] || null;
 }
 
-function logProviderDebug() {
-  const hasPhantom = !!window?.phantom?.solana;
-  const hasSolana = !!window?.solana;
-  const providersCount = Array.isArray(window?.solana?.providers) ? window.solana.providers.length : 0;
-
-  log(
-    `DEBUG — window.phantom.solana: ${hasPhantom ? "YES" : "NO"} | window.solana: ${hasSolana ? "YES" : "NO"} | providers: ${providersCount}`,
-    "hot"
-  );
-}
-
-// ---------- wallet UX ----------
+// ---------- copy address (reliable) ----------
 function copyToClipboardFallback(text) {
   try {
     const ta = document.createElement("textarea");
@@ -231,7 +351,7 @@ function enableCopyAddress() {
   });
 }
 
-// ---------- Network check (RPC fetch, most reliable) ----------
+// ---------- Network check (RPC fetch) ----------
 async function checkNetwork() {
   const statusEl = el("networkStatus");
   if (!statusEl) return;
@@ -265,6 +385,7 @@ async function checkNetwork() {
   }
 }
 
+// ---------- wallet connect/disconnect ----------
 function disconnectWallet() {
   try { state.provider?.disconnect?.(); } catch {}
 
@@ -281,13 +402,12 @@ function disconnectWallet() {
     statusEl.className = "row small muted";
   }
 
+  setVaultUI();
   log("WALLET — disconnected", "hot");
 }
 
-// ---------- connect wallet ----------
 async function connectWallet() {
   const provider = getSolanaProviderPreferPhantom();
-  logProviderDebug();
 
   if (!provider) {
     log("WALLET — no Solana wallet detected.", "bad");
@@ -312,8 +432,9 @@ async function connectWallet() {
 
     setDemoMode(false);
     setWalletUIConnected(!!state.pubkey);
-    log(`WALLET — connected: <span class="mono">${state.pubkey}</span>`, "ok");
+    setVaultUI();
 
+    log(`WALLET — connected: <span class="mono">${state.pubkey}</span>`, "ok");
     await checkNetwork();
   } catch (e) {
     log("WALLET — connect cancelled or failed.", "bad");
@@ -321,7 +442,6 @@ async function connectWallet() {
   }
 }
 
-// optional eager connect if previously trusted
 async function eagerConnectIfTrusted() {
   const provider = getSolanaProviderPreferPhantom();
   if (!provider?.connect) return;
@@ -339,8 +459,9 @@ async function eagerConnectIfTrusted() {
 
       setDemoMode(false);
       setWalletUIConnected(true);
-      log(`WALLET — trusted connect: <span class="mono">${state.pubkey}</span>`, "ok");
+      setVaultUI();
 
+      log(`WALLET — trusted connect: <span class="mono">${state.pubkey}</span>`, "ok");
       await checkNetwork();
     }
   } catch {
@@ -353,8 +474,8 @@ function boot() {
   setDemoMode(true);
   setWalletUIConnected(false);
   setPanicLevel(0);
+  setVaultUI();
 
-  // cooldown slider
   const slider = el("cooldown");
   if (slider) {
     const v = Number(slider.value || 90);
@@ -374,9 +495,10 @@ function boot() {
     });
   }
 
-  // buttons
+  // wallet + bot + panic
   el("connectBtn")?.addEventListener("click", connectWallet);
   el("connectBtn2")?.addEventListener("click", connectWallet);
+  el("disconnectBtn")?.addEventListener("click", disconnectWallet);
 
   el("demoBtn")?.addEventListener("click", () => setDemoMode(true));
 
@@ -385,16 +507,29 @@ function boot() {
 
   el("panicBtn")?.addEventListener("click", panic);
 
-  // wallet UX
-  enableCopyAddress();
-  el("disconnectBtn")?.addEventListener("click", disconnectWallet);
+  // vault
+  el("depositBtn")?.addEventListener("click", depositUSDC);
+  el("withdrawBtn")?.addEventListener("click", withdrawUSDC);
+  el("maxDepositBtn")?.addEventListener("click", () => {
+    const rem = maxDepositRemaining();
+    setDepositInput(rem);
+    log(`VAULT — max remaining set to ${money(rem)}`, "hot");
+  });
 
-  log("BOOT — press START for demo scans. Connect Phantom to show wallet.", "hot");
+  // copy
+  enableCopyAddress();
+
+  log("BOOT — connect wallet → deposit up to $10 → START. PANIC halts everything.", "hot");
 
   eagerConnectIfTrusted();
 }
 
-boot();
+// guaranteed boot
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", boot);
+} else {
+  boot();
+}
 
 /* =========================
    RADAR — 100Hrs Panic Window (DISPLAY ONLY)
@@ -406,7 +541,7 @@ boot();
   const HOUR = 60 * 60 * 1000;
   const RADAR_WINDOW_MS = 100 * HOUR;
   const RADAR_KEY = "panic_radar_cache_v1";
-  const POLL_MS = 120 * 1000; // 2 minutes (safe)
+  const POLL_MS = 120 * 1000;
 
   const $ = (id) => document.getElementById(id);
 
@@ -415,8 +550,6 @@ boot();
   function radarExists(){
     return !!$("radarList") && !!$("radarBest");
   }
-
-  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
   function compactUsd(n){
     const v = Number(n || 0);
@@ -446,13 +579,15 @@ boot();
     return 4;
   }
 
+  function clamp2(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
   function normLog(x, min, max){
     const v = Math.max(0, Number(x || 0));
     const l = Math.log10(v + 1);
     const lmin = Math.log10(min + 1);
     const lmax = Math.log10(max + 1);
     if (lmax === lmin) return 0;
-    return clamp((l - lmin) / (lmax - lmin), 0, 1);
+    return clamp2((l - lmin) / (lmax - lmin), 0, 1);
   }
 
   function isUSDCQuote(pair){
@@ -472,14 +607,14 @@ boot();
     const volN = normLog(vol24, 20_000, 20_000_000);
 
     const momRaw = (ch1 * 0.55) + (ch6 * 0.35) + (ch24 * 0.10);
-    const momN = clamp((momRaw + 20) / 80, 0, 1);
+    const momN = clamp2((momRaw + 20) / 80, 0, 1);
 
     let score = (volN * 0.48 + liqN * 0.37 + momN * 0.15) * 100;
 
     if (liq < 20_000) score *= 0.25;
     else if (liq < 50_000) score *= 0.65;
 
-    return clamp(score, 0, 100);
+    return clamp2(score, 0, 100);
   }
 
   function loadCache(){
@@ -535,7 +670,6 @@ boot();
   function rowHTML(it){
     const lvl = it.panicLevel;
     const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
-
     return `
       <div class="radarRow">
         <div class="radarRow__left">
@@ -607,99 +741,4 @@ boot();
       change1h: Number(pair?.priceChange?.h1 || 0),
       score,
       panicLevel,
-      usdcQuote: isUSDCQuote(pair),
-      ts: Date.now(),
-    };
-  }
-
-  async function refresh(userTriggered=false){
-    if (!radarExists()) return;
-
-    let cache = prune(loadCache());
-    saveCache(cache);
-    render(sortRadar(itemsFromCache(cache)));
-
-    if (userTriggered && typeof log === "function") log("RADAR — manual refresh (100Hrs Panic Window)", "hot");
-
-    try {
-      const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
-      const addrs = uniq((Array.isArray(boosts) ? boosts : []).map(x => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 90);
-
-      if (addrs.length === 0) {
-        if (typeof log === "function") log("RADAR — no candidates returned (DexScreener)", "bad");
-        return;
-      }
-
-      const chunks = chunk(addrs, 30);
-      const pairsAll = [];
-
-      for (const c of chunks) {
-        const url = `https://api.dexscreener.com/tokens/v1/solana/${encodeURIComponent(c.join(","))}`;
-        try {
-          const pairs = await fetchJSON(url);
-          if (Array.isArray(pairs)) pairsAll.push(...pairs);
-        } catch (e) {
-          if (typeof log === "function") log("RADAR — partial fetch failed. continuing.", "bad");
-          console.error(e);
-        }
-        await new Promise(r => setTimeout(r, 250));
-      }
-
-      let added = 0;
-      for (const pair of pairsAll) {
-        if (!pair?.pairAddress) continue;
-        const item = normalizePair(pair);
-        cache[item.pairAddress] = { ts: Date.now(), item };
-        added++;
-      }
-
-      cache = prune(cache);
-      saveCache(cache);
-
-      let items = itemsFromCache(cache).filter(it => it.liquidityUsd > 0 && it.volume24h > 0);
-      items = sortRadar(items);
-
-      render(items);
-
-      if (typeof log === "function") {
-        log(`RADAR — updated ${added} pairs · window 100h`, "ok");
-        if (items[0]) {
-          const b = items[0];
-          log(`LOCK — Best Pick: ${b.name} | Panic ${b.panicLevel} (${panicLabel(b.panicLevel)}) | liq ${compactUsd(b.liquidityUsd)} | vol24 ${compactUsd(b.volume24h)}`, "hot");
-        }
-      }
-    } catch (e) {
-      console.error(e);
-      if (typeof log === "function") log("RADAR — refresh failed (DexScreener). Try again.", "bad");
-    }
-  }
-
-  function clear(){
-    try { localStorage.removeItem(RADAR_KEY); } catch {}
-    if (typeof log === "function") log("RADAR — cache cleared (100h wiped).", "hot");
-    if (radarExists()) render([]);
-  }
-
-  function init(){
-    if (!radarExists()) return;
-
-    let cache = prune(loadCache());
-    saveCache(cache);
-    render(sortRadar(itemsFromCache(cache)));
-
-    $("radarRefreshBtn")?.addEventListener("click", () => refresh(true));
-    $("radarClearBtn")?.addEventListener("click", clear);
-
-    refresh(false);
-
-    // ✅ prevent stacking intervals
-    if (radarIntervalId) clearInterval(radarIntervalId);
-    radarIntervalId = setInterval(() => refresh(false), POLL_MS);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
+      usdcQuote: isUSDCQuot
