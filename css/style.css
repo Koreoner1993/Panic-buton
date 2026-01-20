@@ -546,3 +546,52 @@ body{
 .hero__right{
   padding-top: 14px !important;
 }
+/* =========================
+   STICKY HEADER — SIZE FIX
+   (banner bigger, panic smaller)
+========================= */
+
+/* Header layout breathing room */
+.topbar__inner{
+  align-items: center;
+  gap: 18px;
+}
+
+/* ---------- BANNER (make it visible + bigger) ---------- */
+.topbarBanner{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.topbarBanner img{
+  height: 52px;            /* ⬅️ INCREASE this if you want bigger */
+  max-width: 100%;
+  object-fit: contain;
+  opacity: .95;
+}
+
+/* ---------- PANIC BUTTON (header version only) ---------- */
+.panicBtn--header{
+  width: 92px;             /* ⬅️ smaller than hero version */
+  height: 92px;
+}
+
+.panicBtn--header .panicBtn__ring{
+  border-width: 4px;
+}
+
+.panicBtn--header .panicBtn__cap{
+  width: 68px;
+  height: 68px;
+}
+
+.panicBtn--header .panicBtn__text{
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+/* Optional: keep header compact */
+.topbar{
+  padding: 0;
+}
