@@ -482,3 +482,35 @@ body{
   max-width: 160px;
   line-height: 1.25;
 }
+
+/* =========================
+   FINAL SIZE TUNE (WORKING)
+   Uses EXISTING classes only
+========================= */
+
+/* Banner slightly smaller (but still visible) */
+.bannerFrame{
+  max-height: 140px;
+}
+
+.bannerImg{
+  height: 140px;
+  object-fit: cover;
+}
+
+/* Panic button — slightly smaller, not tiny */
+.panicBtn{
+  width: 170px;      /* was 190 */
+  height: 170px;
+}
+
+/* Inner cap scales automatically */
+.panicBtn__cap{
+  width: 135px;      /* was 150 */
+  height: 135px;
+}
+
+/* Bring panic button down visually a bit */
+.hero__right{
+  padding-top: 18px;
+}
