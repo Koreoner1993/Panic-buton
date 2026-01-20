@@ -699,6 +699,50 @@ input[type="range"]{width:100%}
 
   /* First row cards (by order) */
   .grid > .card:nth-child(1){ grid-column: 1; } /* Wallet */
+
+/* =========================
+   PANIC BUTTON IN STICKY TOPBAR
+   (mini version, always visible)
+========================= */
+
+.panicBtn--top{
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+}
+
+.panicBtn--top .panicBtn__ring{
+  border-width: 3px !important;
+  box-shadow: 0 0 20px rgba(255,27,27,.30) !important;
+}
+
+.panicBtn--top .panicBtn__cap{
+  width: 34px !important;
+  height: 34px !important;
+  box-shadow: inset 0 6px 0 rgba(255,255,255,.10),
+              0 0 26px rgba(255,27,27,.35) !important;
+}
+
+.panicBtn--top .panicBtn__text{
+  font-size: 0 !important;         /* hide big PANIC text in header */
+  letter-spacing: 0 !important;
+}
+
+/* Make room nicely in header */
+.topbar__inner{
+  align-items: center !important;
+}
+.links{
+  gap: 10px !important;
+}
+
+/* Optional: make it stand out more in header */
+.panicBtn--top.is-hot .panicBtn__cap{
+  animation: panicPulse 0.9s ease-in-out infinite;
+}
   .grid > .card:nth-child(2){ grid-column: 2; } /* Vault */
   .grid > .card:nth-child(3){ grid-column: 3; } /* AI Bot */
 
