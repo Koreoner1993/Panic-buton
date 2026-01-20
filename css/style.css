@@ -514,3 +514,35 @@ body{
 .hero__right{
   padding-top: 18px;
 }
+
+/* =========================
+   FINAL SIZE CORRECTION
+   Banner smaller, Panic slightly smaller
+========================= */
+
+/* Banner — smaller */
+.bannerFrame{
+  max-height: 130px !important;
+}
+
+.bannerImg{
+  height: 130px !important;
+  object-fit: cover !important;
+}
+
+/* Panic Button — ACTUALLY smaller */
+.panicBtn{
+  width: 160px !important;
+  height: 160px !important;
+  transform: none !important;   /* ⬅️ THIS IS THE KEY */
+}
+
+.panicBtn__cap{
+  width: 125px !important;
+  height: 125px !important;
+}
+
+/* Keep spacing clean */
+.hero__right{
+  padding-top: 14px !important;
+}
