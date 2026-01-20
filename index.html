@@ -7,7 +7,40 @@
 
   <meta name="theme-color" content="#000000" />
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
-  <link rel="stylesheet" href="./css/style.css?v=6" />
+  <link rel="stylesheet" href="./css/style.css?v=7" />
+
+  <!-- Small “layout safety” styles so Radar scroll + sticky header works even if CSS misses it -->
+  <style>
+    /* Radar scroll + sticky header (minimal + safe) */
+    .radarScroll {
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    .radarSticky {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(10,10,10,.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 10px 10px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+    .radarSticky__top {
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:12px;
+    }
+    .cardHeadRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:12px;
+    }
+  </style>
 </head>
 
 <body>
@@ -68,7 +101,7 @@
           <div class="bannerGlow" aria-hidden="true"></div>
         </div>
 
-        <!-- LOGO STAND (NOT ON THE BUTTON) -->
+        <!-- LOGO STAND -->
         <div class="panicLogoStand">
           <img src="./assets/panic-logo.png" alt="Panic Logo" />
           <div class="panicLogoStand__txt">panic button beta</div>
@@ -85,7 +118,7 @@
       </div>
     </section>
 
-    <!-- GRID -->
+    <!-- GRID (3 cards only) -->
     <section class="grid">
 
       <!-- 1) WALLET -->
@@ -154,11 +187,13 @@
           <button class="btn btn--primary" id="startBtn" type="button">Start</button>
           <button class="btn btn--dim" id="stopBtn" type="button">Stop</button>
         </div>
+
+        <div class="row small muted">Bot is demo. Panic anytime.</div>
       </div>
 
     </section>
 
-    <!-- LOGS (FULL WIDTH) -->
+    <!-- LOGS (FULL WIDTH) — KEEP THIS ABOVE RADAR -->
     <section class="card logsFull" style="margin-top:16px;">
       <div class="cardHeadRow">
         <h2 class="card__title">Live Bot Logs</h2>
@@ -167,28 +202,34 @@
       <div class="log" id="log"></div>
     </section>
 
-    <!-- RADAR (FULL WIDTH) -->
+    <!-- RADAR (FULL WIDTH) — BELOW LOGS -->
     <section class="card radarFull" style="margin-top:16px;">
       <div class="cardHeadRow">
         <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
-        <div class="muted small" id="radarCount">—</div>
+        <div class="muted small" id="radarMeta">—</div>
       </div>
 
-      <div class="row">
-        <div class="kv">
-          <div class="k">Best Pick</div>
-          <div class="v" id="radarBest">—</div>
+      <!-- Sticky best pick header (stays visible while scrolling) -->
+      <div class="radarSticky" id="radarSticky">
+        <div class="radarSticky__top">
+          <div class="kv" style="margin:0;">
+            <div class="k">Best Pick</div>
+            <div class="v" id="radarBest">—</div>
+          </div>
+          <div class="muted small" id="radarCount">0 pairs</div>
         </div>
+        <div class="muted small" id="radarAge">Updated: —</div>
       </div>
 
-      <div class="radarList" id="radarList"></div>
+      <!-- Scroll area for ALL pairs -->
+      <div class="radarList radarScroll" id="radarList"></div>
 
       <div class="row btnRow">
         <button class="btn btn--ghost" id="radarRefreshBtn" type="button">Refresh</button>
         <button class="btn btn--dim" id="radarClearBtn" type="button">Clear</button>
       </div>
 
-      <div class="row small muted">Scroll inside radar to view all pairs.</div>
+      <div class="row small muted">Scroll inside Radar to view all pairs.</div>
     </section>
 
     <footer class="footer">
