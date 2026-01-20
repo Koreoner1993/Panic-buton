@@ -242,8 +242,8 @@ body{
 
 /* ✅ MINI PANIC BUTTON IN HEADER */
 .panicBtn--top{
-  width:44px;
-  height:44px;
+  width:33px;
+  height:33px;
   margin:0;
   flex:0 0 auto;
   display:inline-grid;
