@@ -7,7 +7,7 @@
 
   <meta name="theme-color" content="#000000" />
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
-  <link rel="stylesheet" href="./css/style.css?v=7" />
+  <link rel="stylesheet" href="./css/style.css?v=8" />
 </head>
 
 <body>
@@ -33,11 +33,19 @@
           Community
         </a>
 
-        <!-- 🔴 PANIC BUTTON (ALWAYS VISIBLE) -->
-        <button class="panicBtn panicBtn--top" id="panicBtn" type="button" aria-label="Panic">
+        <!-- 🔴 PANIC BUTTON (ALWAYS VISIBLE + TOOLTIP) -->
+        <button
+          class="panicBtn panicBtn--top"
+          id="panicBtn"
+          type="button"
+          aria-label="Panic button"
+        >
           <span class="panicBtn__ring" aria-hidden="true"></span>
           <span class="panicBtn__cap" aria-hidden="true"></span>
           <span class="panicBtn__text">PANIC</span>
+
+          <!-- Tooltip -->
+          <span class="panicTip" role="tooltip">PANIC — stop the bot instantly</span>
         </button>
       </nav>
 
