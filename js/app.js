@@ -39,20 +39,26 @@ function log(msg, cls = "") {
 
 // ---------- UI ----------
 function setWalletUIConnected(connected) {
-  el("walletPill") && (el("walletPill").textContent = connected ? "Wallet: Connected" : "Wallet: Not Connected");
-  el("addrText") && (el("addrText").textContent = connected ? shortAddr(state.pubkey) : "—");
-  el("modePill") && (el("modePill").textContent = state.demo ? "Mode: Demo" : "Mode: Live");
+  const wp = el("walletPill");
+  const at = el("addrText");
+  const mp = el("modePill");
+
+  if (wp) wp.textContent = connected ? "Wallet: Connected" : "Wallet: Not Connected";
+  if (at) at.textContent = connected ? shortAddr(state.pubkey) : "—";
+  if (mp) mp.textContent = state.demo ? "Mode: Demo" : "Mode: Live";
 }
 
 function setDemoMode(on) {
   state.demo = on;
-  el("modePill") && (el("modePill").textContent = on ? "Mode: Demo" : "Mode: Live");
+  const mp = el("modePill");
+  if (mp) mp.textContent = on ? "Mode: Demo" : "Mode: Live";
   log(on ? "DEMO enabled (simulated scans + trades)" : "LIVE selected (wallet connected; trades still simulated)", "hot");
 }
 
 function setPanicLevel(n) {
   state.panicLevel = n;
-  el("panicLevel") && (el("panicLevel").textContent = String(n));
+  const pl = el("panicLevel");
+  if (pl) pl.textContent = String(n);
 
   const btn = el("panicBtn");
   if (!btn) return;
@@ -67,15 +73,16 @@ function setPanicLevel(n) {
 
 // ---------- Vault ----------
 function setVaultUI() {
-  el("vaultBalance") && (el("vaultBalance").textContent = money(state.vaultUSDC));
+  const vb = el("vaultBalance");
+  if (vb) vb.textContent = money(state.vaultUSDC);
 
   const can = !!state.pubkey;
   const ids = ["depositAmt", "maxDepositBtn", "depositBtn", "withdrawBtn"];
   for (const id of ids) {
-    const n = el(id);
-    if (!n) continue;
-    n.disabled = !can;
-    n.style.opacity = can ? "1" : ".55";
+    const node = el(id);
+    if (!node) continue;
+    node.disabled = !can;
+    node.style.opacity = can ? "1" : ".55";
   }
 }
 
@@ -83,20 +90,17 @@ function getDepositInput() {
   const raw = Number(el("depositAmt")?.value || 0);
   return Number.isFinite(raw) ? raw : 0;
 }
-
 function setDepositInput(val) {
   const input = el("depositAmt");
   if (!input) return;
   input.value = Number(val).toFixed(2);
 }
-
 function maxDepositRemaining() {
   return clamp(state.maxVaultUSDC - state.vaultUSDC, 0, state.maxVaultUSDC);
 }
 
 function depositUSDC() {
   if (!state.pubkey) return log("VAULT — connect wallet first.", "bad");
-
   const amt = getDepositInput();
   if (!(amt > 0)) return log("VAULT — enter deposit amount.", "bad");
 
@@ -108,7 +112,6 @@ function depositUSDC() {
 
   setVaultUI();
   log(`VAULT — deposited ${money(add)} (vault now ${money(state.vaultUSDC)})`, "ok");
-
   if (amt > rem) log(`VAULT — capped at $10 (ignored extra ${money(amt - rem)})`, "hot");
 }
 
@@ -167,7 +170,6 @@ function scorePanic() {
   if (r < 0.97) return 3;
   return 4;
 }
-
 function quoteOk() { return Math.random() > 0.2; }
 
 function tick() {
@@ -180,17 +182,14 @@ function tick() {
 
   if (lvl >= 3) {
     if (state.activeTrade) return log("BOT — one trade at a time. waiting.", "hot");
-
     if (state.vaultUSDC < state.tradeSizeUSDC) {
       log(`BOT — vault too low (${money(state.vaultUSDC)}). deposit more.`, "bad");
       stopBot("Vault empty");
       return;
     }
-
     if (!quoteOk()) return log("QUOTE — $1 USDC route looks trash. skip.", "bad");
 
     state.activeTrade = true;
-
     state.vaultUSDC = +(state.vaultUSDC - state.tradeSizeUSDC).toFixed(2);
     setVaultUI();
     log(`TRADE — spent ${money(state.tradeSizeUSDC)} USDC on ${token}`, "ok");
@@ -345,9 +344,7 @@ async function connectWallet() {
   if (!provider) {
     log("WALLET — no Solana wallet detected.", "bad");
     alert(
-      "No Solana wallet detected.\n\n" +
-      "Desktop: Install Phantom extension.\n" +
-      "Mobile: Open inside Phantom in-app browser."
+      "No Solana wallet detected.\n\nDesktop: Install Phantom extension.\nMobile: Open inside Phantom in-app browser."
     );
     return;
   }
@@ -404,7 +401,9 @@ async function eagerConnectIfTrusted() {
 
 /* =========================
    RADAR — 100Hrs Panic Window (DISPLAY ONLY)
-   Shows ALL items + scroll.
+   - renders ALL pairs
+   - sticky Best Pick header
+   - “Updated Xs ago”
 ========================= */
 (function RadarDisplayOnly(){
   const HOUR = 60 * 60 * 1000;
@@ -413,10 +412,14 @@ async function eagerConnectIfTrusted() {
   const POLL_MS = 120 * 1000;
 
   const $ = (id) => document.getElementById(id);
-  let radarIntervalId = null;
 
-  function radarExists(){ return !!$("radarList") && !!$("radarBest"); }
-  function clamp2(n, a, b){ return Math.max(a, Math.min(b, n)); }
+  let radarIntervalId = null;
+  let ageIntervalId = null;
+  let lastUpdatedTs = 0;
+
+  function radarExists(){
+    return !!$("radarList") && !!$("radarBest") && !!$("radarRefreshBtn") && !!$("radarClearBtn");
+  }
 
   function compactUsd(n){
     const v = Number(n || 0);
@@ -446,6 +449,7 @@ async function eagerConnectIfTrusted() {
     return 4;
   }
 
+  function clamp2(n, a, b){ return Math.max(a, Math.min(b, n)); }
   function normLog(x, min, max){
     const v = Math.max(0, Number(x || 0));
     const l = Math.log10(v + 1);
@@ -527,7 +531,6 @@ async function eagerConnectIfTrusted() {
   }
 
   function rowHTML(it){
-    const lvl = it.panicLevel;
     const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
     return `
       <div class="radarRow">
@@ -536,7 +539,7 @@ async function eagerConnectIfTrusted() {
           <div class="radarMeta">${escapeHtml(meta)}</div>
         </div>
         <div class="radarRow__right">
-          <span class="panicBadge panic${lvl}" title="${escapeHtml(panicLabel(lvl))}">${lvl}</span>
+          <span class="panicBadge panic${it.panicLevel}" title="${escapeHtml(panicLabel(it.panicLevel))}">${it.panicLevel}</span>
           <a class="radarBtnLink" href="${escapeHtml(it.url)}" target="_blank" rel="noreferrer">View</a>
         </div>
       </div>
@@ -545,8 +548,20 @@ async function eagerConnectIfTrusted() {
 
   function setCount(n){
     const c = $("radarCount");
-    if (!c) return;
-    c.textContent = Number.isFinite(n) ? `${n} pairs in the Panic Window` : "—";
+    if (c) c.textContent = `${n} pairs`;
+  }
+
+  function setMeta(text){
+    const m = $("radarMeta");
+    if (m) m.textContent = text;
+  }
+
+  function updateAge(){
+    const a = $("radarAge");
+    if (!a) return;
+    if (!lastUpdatedTs) return (a.textContent = "Updated: —");
+    const sec = Math.max(0, Math.floor((Date.now() - lastUpdatedTs) / 1000));
+    a.textContent = `Updated: ${sec}s ago`;
   }
 
   function render(items){
@@ -556,19 +571,21 @@ async function eagerConnectIfTrusted() {
     const best = $("radarBest");
 
     if (!items || items.length === 0) {
-      list.innerHTML = `<div class="muted small">Radar is asleep. Hit Refresh.</div>`;
-      best.textContent = "—";
+      if (list) list.innerHTML = `<div class="muted small">Radar is asleep. Hit Refresh.</div>`;
+      if (best) best.textContent = "—";
       setCount(0);
+      setMeta("—");
       return;
     }
 
     const top = items[0];
-    best.textContent = `${top.name} (Panic ${top.panicLevel} — ${panicLabel(top.panicLevel)})`;
+    if (best) best.textContent = `${top.name} (Panic ${top.panicLevel} — ${panicLabel(top.panicLevel)})`;
 
     // ✅ SHOW ALL ITEMS (no slice)
-    list.innerHTML = items.map(rowHTML).join("");
+    if (list) list.innerHTML = items.map(rowHTML).join("");
 
     setCount(items.length);
+    setMeta("USDC pairs first · volume + liquidity + momentum");
   }
 
   async function fetchJSON(url, timeoutMs = 12000){
@@ -616,6 +633,7 @@ async function eagerConnectIfTrusted() {
   async function refresh(userTriggered=false){
     if (!radarExists()) return;
 
+    // render cache immediately
     let cache = prune(loadCache());
     saveCache(cache);
     render(sortRadar(itemsFromCache(cache)));
@@ -661,6 +679,10 @@ async function eagerConnectIfTrusted() {
       items = sortRadar(items);
 
       render(items);
+
+      lastUpdatedTs = Date.now();
+      updateAge();
+
       log(`RADAR — updated ${added} pairs · window 100h`, "ok");
     } catch (e) {
       console.error(e);
@@ -671,6 +693,8 @@ async function eagerConnectIfTrusted() {
   function clear(){
     try { localStorage.removeItem(RADAR_KEY); } catch {}
     log("RADAR — cache cleared (100h wiped).", "hot");
+    lastUpdatedTs = 0;
+    updateAge();
     render([]);
   }
 
@@ -678,30 +702,4 @@ async function eagerConnectIfTrusted() {
     if (!radarExists()) return;
 
     let cache = prune(loadCache());
-    saveCache(cache);
-    render(sortRadar(itemsFromCache(cache)));
-
-    $("radarRefreshBtn")?.addEventListener("click", () => refresh(true));
-    $("radarClearBtn")?.addEventListener("click", clear);
-
-    refresh(false);
-    if (radarIntervalId) clearInterval(radarIntervalId);
-    radarIntervalId = setInterval(() => refresh(false), POLL_MS);
-  }
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
-})();
-
-// ---------- Boot ----------
-function boot() {
-  setDemoMode(true);
-  setWalletUIConnected(false);
-  setPanicLevel(0);
-  setVaultUI();
-
-  const slider = el("cooldown");
-  if (slider) {
-    const v = Number(slider.value || 90);
-    state.cooldownSec = v;
-    el(
+    saveCache(cache)
