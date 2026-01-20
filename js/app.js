@@ -402,7 +402,10 @@ async function eagerConnectIfTrusted() {
   }
 }
 
-// ---------- Radar (Display only) ----------
+/* =========================
+   RADAR — 100Hrs Panic Window (DISPLAY ONLY)
+   Shows ALL items + scroll.
+========================= */
 (function RadarDisplayOnly(){
   const HOUR = 60 * 60 * 1000;
   const RADAR_WINDOW_MS = 100 * HOUR;
@@ -540,20 +543,32 @@ async function eagerConnectIfTrusted() {
     `;
   }
 
+  function setCount(n){
+    const c = $("radarCount");
+    if (!c) return;
+    c.textContent = Number.isFinite(n) ? `${n} pairs in the Panic Window` : "—";
+  }
+
   function render(items){
     if (!radarExists()) return;
+
     const list = $("radarList");
     const best = $("radarBest");
 
     if (!items || items.length === 0) {
       list.innerHTML = `<div class="muted small">Radar is asleep. Hit Refresh.</div>`;
       best.textContent = "—";
+      setCount(0);
       return;
     }
 
     const top = items[0];
     best.textContent = `${top.name} (Panic ${top.panicLevel} — ${panicLabel(top.panicLevel)})`;
-    list.innerHTML = items.slice(0,5).map(rowHTML).join("");
+
+    // ✅ SHOW ALL ITEMS (no slice)
+    list.innerHTML = items.map(rowHTML).join("");
+
+    setCount(items.length);
   }
 
   async function fetchJSON(url, timeoutMs = 12000){
@@ -609,22 +624,34 @@ async function eagerConnectIfTrusted() {
 
     try {
       const boosts = await fetchJSON("https://api.dexscreener.com/token-boosts/top/v1");
-      const addrs = uniq((Array.isArray(boosts) ? boosts : []).map(x => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 90);
+      const addrs = uniq((Array.isArray(boosts) ? boosts : []).map(x => x?.tokenAddress || x?.address || x?.token?.address)).slice(0, 120);
+
+      if (addrs.length === 0) {
+        log("RADAR — no candidates returned.", "bad");
+        return;
+      }
 
       const chunks = chunk(addrs, 30);
       const pairsAll = [];
 
       for (const c of chunks) {
         const url = `https://api.dexscreener.com/tokens/v1/solana/${encodeURIComponent(c.join(","))}`;
-        const pairs = await fetchJSON(url);
-        if (Array.isArray(pairs)) pairsAll.push(...pairs);
+        try {
+          const pairs = await fetchJSON(url);
+          if (Array.isArray(pairs)) pairsAll.push(...pairs);
+        } catch (e) {
+          console.error(e);
+          log("RADAR — partial fetch failed. continuing.", "bad");
+        }
         await new Promise(r => setTimeout(r, 250));
       }
 
+      let added = 0;
       for (const pair of pairsAll) {
         if (!pair?.pairAddress) continue;
         const item = normalizePair(pair);
         cache[item.pairAddress] = { ts: Date.now(), item };
+        added++;
       }
 
       cache = prune(cache);
@@ -632,9 +659,9 @@ async function eagerConnectIfTrusted() {
 
       let items = itemsFromCache(cache).filter(it => it.liquidityUsd > 0 && it.volume24h > 0);
       items = sortRadar(items);
-      render(items);
 
-      log(`RADAR — updated ${pairsAll.length} pairs · window 100h`, "ok");
+      render(items);
+      log(`RADAR — updated ${added} pairs · window 100h`, "ok");
     } catch (e) {
       console.error(e);
       log("RADAR — refresh failed. Try again.", "bad");
@@ -673,43 +700,8 @@ function boot() {
   setPanicLevel(0);
   setVaultUI();
 
-  // HARD PROOF JS IS RUNNING
-  log("JS LOADED ✅ (if you see this, paths are correct)", "ok");
-
   const slider = el("cooldown");
   if (slider) {
     const v = Number(slider.value || 90);
     state.cooldownSec = v;
-    el("cooldownVal") && (el("cooldownVal").textContent = String(v));
-    slider.addEventListener("input", (e) => {
-      state.cooldownSec = Number(e.target.value);
-      el("cooldownVal") && (el("cooldownVal").textContent = String(state.cooldownSec));
-      if (state.running) { stopBot("cooldown changed — restarting"); startBot(); }
-    });
-  }
-
-  el("connectBtn")?.addEventListener("click", connectWallet);
-  el("connectBtn2")?.addEventListener("click", connectWallet);
-  el("disconnectBtn")?.addEventListener("click", disconnectWallet);
-
-  el("demoBtn")?.addEventListener("click", () => setDemoMode(true));
-
-  el("startBtn")?.addEventListener("click", startBot);
-  el("stopBtn")?.addEventListener("click", () => stopBot("Stopped by user"));
-  el("panicBtn")?.addEventListener("click", panic);
-
-  el("depositBtn")?.addEventListener("click", depositUSDC);
-  el("withdrawBtn")?.addEventListener("click", withdrawUSDC);
-  el("maxDepositBtn")?.addEventListener("click", () => {
-    const rem = maxDepositRemaining();
-    setDepositInput(rem);
-    log(`VAULT — max remaining set to ${money(rem)}`, "hot");
-  });
-
-  enableCopyAddress();
-  log("BOOT — connect wallet → deposit up to $10 → START. PANIC halts everything.", "hot");
-  eagerConnectIfTrusted();
-}
-
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-else boot();
+    el(
