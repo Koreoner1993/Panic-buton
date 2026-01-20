@@ -1,826 +1,160 @@
-:root{
-  --bg:#000;
-  --panel:#0b0b0c;
-  --panel2:#0f0f12;
-  --line:rgba(255,255,255,.08);
-  --text:#fff;
-  --muted:rgba(255,255,255,.68);
-  --red:#ff1b1b;
-  --red2:#b50000;
-  --gold:#ffcc33;
-  --shadow: 0 18px 60px rgba(0,0,0,.7);
-  --radius:18px;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
 *{box-sizing:border-box}
-html,body{height:100%}
 body{
   margin:0;
-  background:
-    radial-gradient(1100px 500px at 35% 10%, rgba(255,30,30,.18), transparent 60%),
-    radial-gradient(900px 450px at 70% 18%, rgba(255,120,0,.07), transparent 60%),
-    radial-gradient(1200px 600px at 50% 120%, rgba(255,30,30,.10), transparent 60%),
-    var(--bg);
-  color:var(--text);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
-
-.bg-grain{
-  position:fixed; inset:0;
-  pointer-events:none;
-  opacity:.08;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
+  background:#000;
+  color:#fff;
+  font-family:Inter,system-ui,sans-serif;
 }
 
 .container{
-  max-width:1160px;
+  max-width:1100px;
   margin:0 auto;
-  padding:28px 18px 80px;
+  padding:16px;
 }
 
-.muted{color:var(--muted)}
-.small{font-size:12px}
-.mono{font-family:var(--mono)}
-
-/* TOP BAR */
 .topbar{
-  position:sticky; top:0; z-index:50;
-  backdrop-filter: blur(12px);
-  background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.38));
-  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(0,0,0,.9);
+  border-bottom:1px solid rgba(255,255,255,.08);
 }
+
 .topbar__inner{
-  max-width:1160px;
-  margin:0 auto;
-  padding:14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+}
+
+.brand{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:14px;
+  gap:10px;
 }
-.brand{display:flex; align-items:center; gap:12px}
-.brand__text{display:flex; flex-direction:column}
-.brand__title{font-weight:1000; letter-spacing:.06em; font-size:13px}
-.brand__sub{font-size:12px; color:var(--muted); margin-top:2px}
 
-.links{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.brand__logo{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+}
+
+.links{
+  display:flex;
+  gap:10px;
+}
+
 .link{
-  color:var(--muted);
-  text-decoration:none;
-  font-weight:900;
-  font-size:13px;
-  padding:9px 12px;
-  border-radius:999px;
-  border:1px solid transparent;
-}
-.link:hover{
   color:#fff;
-  border-color:rgba(255,27,27,.35);
-  background:rgba(255,27,27,.08);
-}
-.link--outline{
-  border-color:rgba(255,255,255,.12);
-  background:rgba(255,255,255,.03);
+  text-decoration:none;
+  font-size:13px;
 }
 
-/* HERO */
 .hero{
   display:grid;
-  grid-template-columns: 1.1fr .9fr;
-  gap:22px;
-  align-items:stretch;
-  padding-top:22px;
-}
-@media (max-width: 980px){
-  .hero{grid-template-columns:1fr}
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:16px;
 }
 
-.hero__h1{
-  margin:0;
-  font-size:56px;
-  letter-spacing:.02em;
-  font-weight:1000;
-}
-.hero__beta{
-  margin:6px 0 0;
-  font-weight:1000;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  font-size:12px;
-  color:rgba(255,27,27,.92);
-}
-.hero__p{
-  margin:12px 0 14px;
-  color:var(--muted);
-  line-height:1.45
-}
-
-.hero__status{display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 16px}
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  background: rgba(255,255,255,.03);
-  font-weight:900;
-  font-size:12px;
-}
-.pill--dim{opacity:.9}
-.pill--red{
-  border-color:rgba(255,27,27,.45);
-  background: rgba(255,27,27,.10);
-}
-
-.hero__ctaRow{display:flex; gap:10px; flex-wrap:wrap}
-
-.btn{
-  border:1px solid transparent;
-  border-radius:14px;
-  padding:12px 14px;
-  font-weight:1000;
-  cursor:pointer;
-  background:#17171a;
-  color:#fff;
-  transition: transform .08s ease, background .2s ease, border-color .2s ease, filter .2s ease;
-}
-.btn:active{transform:scale(.98)}
-.btn--primary{
-  background: linear-gradient(180deg, var(--red), var(--red2));
-  border-color: rgba(255,27,27,.4);
-  box-shadow: 0 12px 40px rgba(255,27,27,.18);
-}
-.btn--primary:hover{filter: brightness(1.05)}
-.btn--ghost{
-  background: rgba(255,255,255,.04);
-  border-color: rgba(255,255,255,.09);
-}
-.btn--dim{
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.10);
-  color: rgba(255,255,255,.85);
-}
-
-.fineprint{
-  margin:14px 0 0;
-  color: rgba(255,255,255,.72);
-  font-size:12.5px;
-  line-height:1.5;
-}
-
-/* HERO RIGHT */
 .hero__right{
-  position:relative;
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-  border:1px solid var(--line);
-  box-shadow: var(--shadow);
-  padding:14px;
-  overflow:hidden;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:14px;
+  gap:10px;
 }
 
-.bannerFrame{
+.bannerFrame img{
   width:100%;
-  border-radius: 16px;
-  border:1px solid rgba(255,255,255,.10);
-  overflow:hidden;
-  background:#050506;
-  position:relative;
-}
-.bannerImg{width:100%; display:block}
-.bannerGlow{
-  position:absolute; inset:-30%;
-  background: radial-gradient(circle at 70% 40%, rgba(255,27,27,.28), transparent 55%);
-  pointer-events:none;
+  border-radius:12px;
 }
 
-/* PANIC BUTTON (matches your current HTML structure) */
+.panicLogoStand img{
+  width:64px;
+  height:64px;
+}
+
 .panicBtn{
-  position:relative;
-  width:190px;
-  height:190px;
+  width:150px;
+  height:150px;
   border-radius:50%;
-  background:transparent;
+  background:none;
   border:none;
-  cursor:pointer;
-  margin-top:2px;
+  position:relative;
 }
+
 .panicBtn__ring{
-  position:absolute; inset:0;
+  position:absolute;
+  inset:0;
+  border:5px solid #ffcc33;
   border-radius:50%;
-  border:6px solid rgba(255,204,51,.9);
-  box-shadow: 0 0 42px rgba(255,27,27,.35);
 }
+
 .panicBtn__cap{
   position:absolute;
-  left:50%; top:50%;
-  transform: translate(-50%,-50%);
-  width:150px; height:150px;
+  inset:18px;
   border-radius:50%;
-  background: radial-gradient(circle at 30% 25%, #ff6a6a, var(--red2) 70%);
-  box-shadow: inset 0 10px 0 rgba(255,255,255,.12),
-              0 0 60px rgba(255,27,27,.45);
-  display:grid;
-  place-items:center;
+  background:#ff1b1b;
 }
+
 .panicBtn__text{
   position:absolute;
-  left:50%; top:50%;
-  transform:translate(-50%,-50%);
-  font-weight:1000;
-  letter-spacing:.12em;
-  font-size:14px;
-  text-shadow: 0 2px 20px rgba(0,0,0,.8);
-  pointer-events:none;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
 }
-.panicBtn:hover .panicBtn__cap{filter:brightness(1.05)}
-.panicBtn:active{transform: scale(.985)}
 
-.hint{color:var(--muted); font-size:12px; text-align:center}
-
-/* GRID */
 .grid{
-  margin-top:22px;
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:16px;
-}
-@media (max-width: 980px){
-  .grid{grid-template-columns:1fr}
-  .hero__h1{font-size:44px}
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:16px;
 }
 
 .card{
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-  border:1px solid var(--line);
-  box-shadow: var(--shadow);
-  padding:18px;
-}
-.card__title{margin:0 0 12px; font-size:16px; letter-spacing:.02em}
-.row{margin-top:12px}
-.kv{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
-.k{color:var(--muted); font-size:12px}
-.v{font-weight:1000}
-.label{display:block; color:var(--muted); font-size:12px; margin-bottom:8px}
-
-input[type="range"]{width:100%}
-
-.btnRow{display:flex; gap:10px}
-.btnRow .btn{flex:1}
-
-/* LOG */
-.log{
-  height:190px;
+  border:1px solid rgba(255,255,255,.1);
   border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background:#050506;
-  padding:12px;
+  padding:14px;
+}
+
+.logsFull,
+.radarFull{
+  margin-top:16px;
+}
+
+.log{
+  height:180px;
   overflow:auto;
-  font-family:var(--mono);
+  background:#050505;
+  padding:10px;
   font-size:12px;
-  line-height:1.35;
-}
-.logFooter{
-  display:flex; justify-content:space-between; align-items:center; gap:10px;
-  margin-top:12px;
 }
 
-/* Panic button states (JS toggles these) */
-.panicBtn.is-hot .panicBtn__cap{
-  animation: panicPulse 1.1s ease-in-out infinite;
-}
-.panicBtn.is-hot .panicBtn__ring{
-  box-shadow: 0 0 65px rgba(255,27,27,.60);
-}
-
-@keyframes panicPulse{
-  0%,100% { filter: brightness(1.0); transform: translate(-50%,-50%) scale(1); }
-  50%     { filter: brightness(1.12); transform: translate(-50%,-50%) scale(1.03); }
-}
-
-.panicBtn.is-cooled .panicBtn__cap{
-  background: radial-gradient(circle at 30% 25%, #6b6b6b, #1c1c1c 70%);
-  box-shadow: inset 0 8px 0 rgba(255,255,255,.04),
-              0 0 22px rgba(255,255,255,.06);
-  animation:none;
-}
-.panicBtn.is-cooled .panicBtn__ring{
-  border-color: rgba(255,255,255,.25);
-  box-shadow:none;
-  opacity:.85;
-}
-
-
-
-/* PANIC LEVEL TAG */
-.panicLevel{
-  display:inline-flex;
-  min-width:34px;
-  justify-content:center;
-  padding:6px 10px;
-  border-radius:12px;
-  border:1px solid rgba(255,27,27,.35);
-  background: rgba(255,27,27,.10);
-}
-
-/* FOOTER */
-.footer{
-  margin-top:26px;
-  padding-top:18px;
-  border-top:1px solid rgba(255,255,255,.08);
-}
-
-.log .ok{color:#8bffb3}
-.log .bad{color:#ff8b8b}
-.log .hot{color:#ffd27a}
-
-/* Vault input */
-.inputRow{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.03);
-}
-
-.inputPrefix{
-  color: rgba(255,255,255,.7);
-  font-weight:900;
-}
-
-.input{
-  flex:1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color:#fff;
-  font-weight:900;
-  font-size:14px;
-}
-
-.btn--mini{
-  padding:10px 12px;
-  border-radius:12px;
-}
-
-/* ===== RADAR (100Hrs Panic Window) ===== */
-.radarList{
+.radarFull{
   display:flex;
   flex-direction:column;
-  gap:10px;
-  margin-top:6px;
 }
 
-.radarRow{
-  display:grid;
-  grid-template-columns: 1.2fr .7fr;
-  gap:10px;
-  align-items:center;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.03);
+.radarSticky{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,.1);
 }
 
-.radarRow__left{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  min-width:0;
-}
-
-.radarName{
-  font-weight:1000;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.radarMeta{
-  font-size:12px;
-  color: rgba(255,255,255,.72);
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.radarRow__right{
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  align-items:center;
-}
-
-.panicBadge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:34px;
-  padding:6px 10px;
-  border-radius:999px;
-  font-weight:1000;
-  font-size:12px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
-}
-
-.panic0{ opacity:.6; }
-.panic1{ border-color: rgba(255,255,255,.22); }
-.panic2{ border-color: rgba(255,210,122,.40); background: rgba(255,210,122,.10); }
-.panic3{ border-color: rgba(255,27,27,.45); background: rgba(255,27,27,.10); }
-.panic4{ border-color: rgba(255,27,27,.70); background: rgba(255,27,27,.18); box-shadow: 0 0 24px rgba(255,27,27,.25); }
-
-.radarBtnLink{
-  text-decoration:none;
-  font-weight:1000;
-  font-size:12px;
-  color:#fff;
-  padding:8px 10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-}
-.radarBtnLink:hover{
-  border-color: rgba(255,27,27,.35);
-  background: rgba(255,27,27,.08);
-}
-
-/* Small helper for the "Best Pick" value */
-#radarBest{
-  font-weight:1000;
-}
-
-/* ===== RADAR (100Hrs Panic Window) ===== */
-.radarList{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:6px;
-}
-
-.radarRow{
-  display:grid;
-  grid-template-columns: 1.2fr .7fr;
-  gap:10px;
-  align-items:center;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.03);
-}
-
-.radarRow__left{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  min-width:0;
-}
-
-.radarName{
-  font-weight:1000;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.radarMeta{
-  font-size:12px;
-  color: rgba(255,255,255,.72);
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.radarRow__right{
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  align-items:center;
-}
-
-.panicBadge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:34px;
-  padding:6px 10px;
-  border-radius:999px;
-  font-weight:1000;
-  font-size:12px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
-}
-
-.panic0{ opacity:.6; }
-.panic1{ border-color: rgba(255,255,255,.22); }
-.panic2{ border-color: rgba(255,210,122,.40); background: rgba(255,210,122,.10); }
-.panic3{ border-color: rgba(255,27,27,.45); background: rgba(255,27,27,.10); }
-.panic4{ border-color: rgba(255,27,27,.70); background: rgba(255,27,27,.18); box-shadow: 0 0 24px rgba(255,27,27,.25); }
-
-.radarBtnLink{
-  text-decoration:none;
-  font-weight:1000;
-  font-size:12px;
-  color:#fff;
-  padding:8px 10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-}
-.radarBtnLink:hover{
-  border-color: rgba(255,27,27,.35);
-  background: rgba(255,27,27,.08);
-}
-
-#radarBest{ font-weight:1000; }
-
-/* Logo above the panic button */
-.panicLogoStand{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-  margin: 10px 0 8px;
-}
-
-.panicLogoStand img{
-  width: 84px;     /* <-- change this */
-  height: 84px;    /* <-- change this */
-  object-fit: contain;
-  border-radius: 50%;
-  box-shadow: 0 0 18px rgba(255,27,27,.35);
-}
-
-.panicLogoStand__txt{
-  font-size: 12px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  opacity: .75;
-}
-
-/* =========================
-   RESPONSIVE “NOT BULKY” PATCH
-   Paste at bottom of css/style.css
-========================= */
-
-/* 1) Make the whole page breathe less */
-.container{
-  max-width: 1100px;              /* was likely too wide or too padded */
-  padding: 18px 14px !important;  /* reduce top/bottom/side padding */
-}
-
-/* 2) Tighten HERO: smaller headline + smaller spacing */
-.hero{
-  gap: 14px !important;
-  padding: 10px 0 8px !important;
-}
-
-.hero__h1{
-  font-size: clamp(30px, 3.6vw, 46px) !important;
-  line-height: 1.05 !important;
-  margin: 0 0 6px !important;
-}
-
-.hero__beta{
-  margin: 0 0 8px !important;
-}
-
-.hero__p{
-  margin: 0 0 10px !important;
-}
-
-.fineprint{
-  margin-top: 10px !important;
-}
-
-/* 3) Banner smaller so it doesn't push everything down */
-.bannerFrame{
-  max-height: 160px !important;
-  overflow: hidden !important;
-  border-radius: 14px !important;
-}
-
-.bannerImg{
-  height: 160px !important;
-  width: 100% !important;
-  object-fit: cover !important;
-}
-
-/* 4) Logo stand smaller (your “logo.png too big” fix) */
-.panicLogoStand{
-  margin: 10px 0 6px !important;
-}
-.panicLogoStand img{
-  width: 64px !important;
-  height: 64px !important;
-}
-
-/* 5) Panic button slightly smaller */
-.panicBtn{
-  transform: scale(.92);
-  transform-origin: top center;
-}
-
-/* 6) Cards: reduce padding / heading size */
-.card{
-  padding: 14px !important;
-}
-.card__title{
-  font-size: 14px !important;
-  margin: 0 0 10px !important;
-}
-
-/* 7) Make GRID more “desktop-like” (less scrolling) */
-.grid{
-  display: grid !important;
-  gap: 12px !important;
-  grid-template-columns: 1fr; /* mobile default */
-}
-
-/* Desktop: 3 columns so Wallet/Vault/Radar sit across */
-@media (min-width: 980px){
-  .grid{
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    align-items: start;
-  }
-
-  /* Put AI Bot under Radar (right column) */
-  /* This works only if your order is Wallet, Vault, Radar, AI Bot */
-  .grid > .card:nth-child(4){
-    grid-column: 3;
-  }
-
-  /* Logs full width under everything */
-  .log{
-    max-height: 220px;
-  }
-}
-
-/* 8) Logs shouldn’t grow forever */
-.log{
-  max-height: 240px;      /* keeps page short */
-  overflow: auto;
-}
-
-/* 9) Smaller rows and inputs */
-.row{ margin: 10px 0 !important; }
-.inputRow{ gap: 8px !important; }
-.btn{ padding: 10px 12px !important; }
-.btn--mini{ padding: 8px 10px !important; }
-
-/* =========================
-   DESKTOP LAYOUT — LOCKED
-   [ Wallet ] [ Vault ] [ AI Bot ]
-   [ Logs  — full width ]
-   [ Radar — full width ]
-========================= */
-
-.grid{
-  display: grid !important;
-  gap: 14px !important;
-}
-
-/* Desktop layout */
-@media (min-width: 980px){
-  .grid{
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    align-items: start !important;
-  }
-
-  /* First row cards (by order) */
-  .grid > .card:nth-child(1){ grid-column: 1; } /* Wallet */
-
-/* =========================
-   PANIC BUTTON IN STICKY TOPBAR
-   (mini version, always visible)
-========================= */
-
-.panicBtn--top{
-  width: 44px !important;
-  height: 44px !important;
-  margin: 0 !important;
-  flex: 0 0 auto;
-  display: inline-grid;
-  place-items: center;
-}
-
-.panicBtn--top .panicBtn__ring{
-  border-width: 3px !important;
-  box-shadow: 0 0 20px rgba(255,27,27,.30) !important;
-}
-
-.panicBtn--top .panicBtn__cap{
-  width: 34px !important;
-  height: 34px !important;
-  box-shadow: inset 0 6px 0 rgba(255,255,255,.10),
-              0 0 26px rgba(255,27,27,.35) !important;
-}
-
-.panicBtn--top .panicBtn__text{
-  font-size: 0 !important;         /* hide big PANIC text in header */
-  letter-spacing: 0 !important;
-}
-
-/* Make room nicely in header */
-.topbar__inner{
-  align-items: center !important;
-}
-.links{
-  gap: 10px !important;
-}
-
-/* Optional: make it stand out more in header */
-.panicBtn--top.is-hot .panicBtn__cap{
-  animation: panicPulse 0.9s ease-in-out infinite;
-}
-  .grid > .card:nth-child(2){ grid-column: 2; } /* Vault */
-  .grid > .card:nth-child(3){ grid-column: 3; } /* AI Bot */
-
-  /* Full-width rows */
-  .logsFull{
-    grid-column: 1 / -1 !important;
-  }
-
-  .radarFull{
-    grid-column: 1 / -1 !important;
-  }
-}
-
-/* Logs shouldn't stretch page height */
-#log{
-  max-height: 220px;
-  overflow-y: auto;
-}
-
-.topbar{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 9999;
-}
-.container{
-  padding-top: 78px; /* add space so content isn't hidden under header */
-}
-
-/* =========================
-   RADAR: SHOW TOP 7 + SCROLL REST
-========================= */
-
-/* Approx height for ~7 radar rows */
 .radarScroll{
-  max-height: 380px;          /* ~7 rows */
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: block !important;
-  -webkit-overflow-scrolling: touch;
+  max-height:320px;
+  overflow-y:auto;
 }
 
-/* Each radar row height reference (do NOT change layout) */
-.radarRow{
-  min-height: 48px;
-}
-
-/* Mobile: slightly smaller so 7 still fits */
-@media (max-width: 600px){
-  .radarScroll{
-    max-height: 320px;
-  }
-}
-/* =========================
-   RADAR SCROLL — HARD LOCK
-========================= */
-
-/* The ONLY element allowed to scroll */
-.radarScroll{
-  max-height: 380px;
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  /* 🔑 force scroll context */
-  display: block;
-  position: relative;
-}
-
-/* Prevent list from expanding the page */
 .radarList{
-  display: block;          /* NOT flex-height driven */
-  max-height: none;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-/* Mobile adjustment */
-@media (max-width: 600px){
-  .radarScroll{
-    max-height: 320px;
-  }
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .radarScroll{max-height:260px}
 }
