@@ -761,3 +761,14 @@ input[type="range"]{width:100%}
   max-height: 220px;
   overflow-y: auto;
 }
+
+.topbar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+.container{
+  padding-top: 78px; /* add space so content isn't hidden under header */
+}
