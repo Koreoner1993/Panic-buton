@@ -772,3 +772,28 @@ input[type="range"]{width:100%}
 .container{
   padding-top: 78px; /* add space so content isn't hidden under header */
 }
+
+/* =========================
+   RADAR: SHOW TOP 7 + SCROLL REST
+========================= */
+
+/* Approx height for ~7 radar rows */
+.radarScroll{
+  max-height: 380px;          /* ~7 rows */
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Each radar row height reference (do NOT change layout) */
+.radarRow{
+  min-height: 48px;
+}
+
+/* Mobile: slightly smaller so 7 still fits */
+@media (max-width: 600px){
+  .radarScroll{
+    max-height: 320px;
+  }
+}
