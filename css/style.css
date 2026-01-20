@@ -64,9 +64,9 @@ body{
 
 .brand{display:flex; align-items:center; gap:12px}
 .brand__logo{
-  width:42px;
-  height:42px;
-  border-radius:600%;
+  width:402px;
+  height:402px;
+  border-radius:6000%;
   box-shadow:0 0 12px rgba(255,27,27,.35);
 }
 .brand__text{display:flex; flex-direction:column}
