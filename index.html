@@ -174,29 +174,36 @@
       <div class="log" id="log"></div>
     </section>
 
-    <!-- RADAR -->
-    <section class="card radarFull" style="margin-top:16px;">
-      <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
+  <!-- RADAR (FULL WIDTH) — BELOW LOGS -->
+<section class="card radarFull" style="margin-top:16px;">
+  <div class="cardHeadRow">
+    <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
+    <div class="muted small" id="radarMeta">—</div>
+  </div>
 
-      <div class="kv">
+  <!-- Sticky Best Pick -->
+  <div class="radarSticky">
+    <div class="radarSticky__top">
+      <div class="kv" style="margin:0;">
         <div class="k">Best Pick</div>
         <div class="v" id="radarBest">—</div>
       </div>
+      <div class="muted small" id="radarCount">0 pairs</div>
+    </div>
+    <div class="muted small" id="radarAge">Updated: —</div>
+  </div>
 
-      <div class="radarList radarScroll" id="radarList"></div>
+  <!-- 🔑 SCROLL WRAPPER (THIS IS THE FIX) -->
+  <div class="radarScroll">
+    <div class="radarList" id="radarList"></div>
+  </div>
 
-      <div class="row btnRow">
-        <button class="btn btn--ghost" id="radarRefreshBtn">Refresh</button>
-        <button class="btn btn--dim" id="radarClearBtn">Clear</button>
-      </div>
-    </section>
+  <div class="row btnRow">
+    <button class="btn btn--ghost" id="radarRefreshBtn" type="button">Refresh</button>
+    <button class="btn btn--dim" id="radarClearBtn" type="button">Clear</button>
+  </div>
 
-    <footer class="footer">
-      <div class="muted small">panic is experimental · not financial advice</div>
-    </footer>
-
-  </main>
-
-  <script src="./js/app.js"></script>
-</body>
-</html>
+  <div class="row small muted">
+    Showing top picks · scroll for more
+  </div>
+</section>
