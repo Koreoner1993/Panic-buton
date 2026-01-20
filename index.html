@@ -7,7 +7,8 @@
 
   <meta name="theme-color" content="#000000" />
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
-  <link rel="stylesheet" href="./css/style.css?v=2" />
+  <link rel="stylesheet" href="./css/style.css?v=5" />
+</head>
 
 <body>
   <div class="bg-grain" aria-hidden="true"></div>
@@ -16,11 +17,7 @@
   <header class="topbar">
     <div class="topbar__inner">
       <div class="brand">
-        <img
-          src="./assets/panic-logo.png"
-          alt="Panic Button Logo"
-          class="brand__logo"
-        />
+        <img src="./assets/panic-logo.png" alt="Panic Logo" class="brand__logo" />
         <div class="brand__text">
           <div class="brand__title">PANIC BUTTON</div>
           <div class="brand__sub">beta is live</div>
@@ -28,8 +25,8 @@
       </div>
 
       <nav class="links">
-        <a class="link" href="https://x.com/PanicButtonton" target="_blank" rel="noreferrer">@PanicButtonton</a>
-        <a class="link link--outline" href="https://x.com/i/communities/2010590489972469792" target="_blank" rel="noreferrer">Community</a>
+        <a class="link" href="https://x.com/PanicButtonton" target="_blank">@PanicButtonton</a>
+        <a class="link link--outline" href="https://x.com/i/communities/2010590489972469792" target="_blank">Community</a>
       </nav>
     </div>
   </header>
@@ -44,7 +41,7 @@
 
         <p class="hero__p">
           One-page degen trading control panel.
-          <span class="muted">Experimental. $1 micro-trades. Panic anytime.</span>
+          <span class="muted">Experimental. $1 micro-trades.</span>
         </p>
 
         <div class="hero__status">
@@ -56,31 +53,26 @@
           <button class="btn btn--primary" id="connectBtn" type="button">Connect Phantom</button>
           <button class="btn btn--ghost" id="demoBtn" type="button">Run Demo</button>
         </div>
-
-        <p class="fineprint">
-          Beta rules:
-          <b>$10 max deposit</b>, <b>$1 per trade</b>, <b>one trade at a time</b>, <b>auto-stop +65%</b>.
-          <span class="muted">No promises.</span>
-        </p>
       </div>
 
       <div class="hero__right">
+
         <!-- BANNER -->
         <div class="bannerFrame">
-          <img class="bannerImg" src="./assets/panic-banner.png" alt="Panic Button Banner" />
-          <div class="bannerGlow" aria-hidden="true"></div>
+          <img src="./assets/panic-banner.png" class="bannerImg" alt="Panic Banner" />
+          <div class="bannerGlow"></div>
         </div>
 
-        <!-- LOGO (MOVED OFF THE BUTTON) -->
+        <!-- LOGO STAND (NOT A BUTTON) -->
         <div class="panicLogoStand">
           <img src="./assets/panic-logo.png" alt="Panic Logo" />
-          <div class="panicLogoStand__txt">Panic is live.</div>
+          <div class="panicLogoStand__txt">panic is live</div>
         </div>
 
-        <!-- PANIC BUTTON (TEXT ONLY) -->
-        <button class="panicBtn" id="panicBtn" aria-label="Panic button" type="button">
-          <span class="panicBtn__ring" aria-hidden="true"></span>
-          <span class="panicBtn__cap" aria-hidden="true"></span>
+        <!-- PANIC BUTTON -->
+        <button class="panicBtn" id="panicBtn" type="button">
+          <span class="panicBtn__ring"></span>
+          <span class="panicBtn__cap"></span>
           <span class="panicBtn__text">PANIC</span>
         </button>
 
@@ -91,88 +83,58 @@
     <!-- GRID -->
     <section class="grid">
 
-      <!-- WALLET -->
+      <!-- 1️⃣ WALLET -->
       <div class="card">
         <h2 class="card__title">Wallet</h2>
 
         <div class="row">
           <div class="kv">
             <div class="k">Address</div>
-            <div class="v mono walletAddr" id="addrText" title="Click to copy address">—</div>
+            <div class="v mono walletAddr" id="addrText">—</div>
           </div>
         </div>
 
         <div class="row btnRow">
-          <button class="btn btn--primary" id="connectBtn2" type="button">Connect Wallet</button>
-          <button class="btn btn--dim" id="disconnectBtn" type="button">Disconnect</button>
+          <button class="btn btn--primary" id="connectBtn2">Connect</button>
+          <button class="btn btn--dim" id="disconnectBtn">Disconnect</button>
         </div>
 
         <div class="row small muted" id="networkStatus">Network: —</div>
-        <div class="row small muted">Click address to copy.</div>
       </div>
 
-      <!-- VAULT -->
+      <!-- 2️⃣ VAULT -->
       <div class="card">
         <h2 class="card__title">Vault (USDC)</h2>
 
         <div class="row">
           <div class="kv">
-            <div class="k">Vault Balance</div>
-            <div class="v"><span class="mono" id="vaultBalance">$0.00</span></div>
+            <div class="k">Balance</div>
+            <div class="v mono" id="vaultBalance">$0.00</div>
           </div>
         </div>
 
         <div class="row">
-          <label class="label">Deposit (max $10)</label>
-
           <div class="inputRow">
             <span class="inputPrefix">$</span>
-            <input class="input" id="depositAmt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="1.00" />
-            <button class="btn btn--ghost btn--mini" id="maxDepositBtn" type="button">MAX</button>
-          </div>
-
-          <div class="muted small">Beta UI only (no tx yet).</div>
-        </div>
-
-        <div class="row btnRow">
-          <button class="btn btn--primary" id="depositBtn" type="button">Deposit</button>
-          <button class="btn btn--dim" id="withdrawBtn" type="button">Withdraw</button>
-        </div>
-
-        <div class="row small muted">Rules: max $10 · $1 trades · one at a time</div>
-      </div>
-
-      <!-- RADAR -->
-      <div class="card">
-        <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
-
-        <div class="row">
-          <div class="kv">
-            <div class="k">Best Pick (100h)</div>
-            <div class="v" id="radarBest">—</div>
+            <input id="depositAmt" class="input" type="number" step="0.01" placeholder="1.00" />
+            <button class="btn btn--ghost btn--mini" id="maxDepositBtn">MAX</button>
           </div>
         </div>
 
-        <div class="row">
-          <div class="radarList" id="radarList"></div>
-        </div>
-
         <div class="row btnRow">
-          <button class="btn btn--ghost" id="radarRefreshBtn" type="button">Refresh Radar</button>
-          <button class="btn btn--dim" id="radarClearBtn" type="button">Clear Cache</button>
+          <button class="btn btn--primary" id="depositBtn">Deposit</button>
+          <button class="btn btn--dim" id="withdrawBtn">Withdraw</button>
         </div>
-
-        <div class="row small muted">Levels: Asleep → Twitching → Sweaty → Redline → Full Panic</div>
       </div>
 
-      <!-- AI BOT -->
+      <!-- 3️⃣ AI BOT -->
       <div class="card">
         <h2 class="card__title">AI Bot</h2>
 
         <div class="row">
           <div class="kv">
             <div class="k">Panic Level</div>
-            <div class="v"><span class="panicLevel" id="panicLevel">0</span></div>
+            <div class="v"><span id="panicLevel">0</span></div>
           </div>
         </div>
 
@@ -183,32 +145,46 @@
         </div>
 
         <div class="row btnRow">
-          <button class="btn btn--primary" id="startBtn" type="button">Start</button>
-          <button class="btn btn--dim" id="stopBtn" type="button">Stop</button>
+          <button class="btn btn--primary" id="startBtn">Start</button>
+          <button class="btn btn--dim" id="stopBtn">Stop</button>
+        </div>
+      </div>
+
+      <!-- 4️⃣ RADAR (FULL WIDTH) -->
+      <div class="card radarFull">
+        <h2 class="card__title">RADAR — 100Hrs Panic Window</h2>
+
+        <div class="row">
+          <div class="kv">
+            <div class="k">Best Pick</div>
+            <div class="v" id="radarBest">—</div>
+          </div>
         </div>
 
-        <div class="row small muted">Bot is demo. Radar is display-only.</div>
+        <div class="radarList" id="radarList"></div>
+
+        <div class="row btnRow">
+          <button class="btn btn--ghost" id="radarRefreshBtn">Refresh</button>
+          <button class="btn btn--dim" id="radarClearBtn">Clear</button>
+        </div>
       </div>
 
     </section>
 
-    <!-- LOGS -->
-    <section class="card" style="margin-top:16px;">
+    <!-- LOGS (FULL WIDTH) -->
+    <section class="card logsFull" style="margin-top:16px;">
       <h2 class="card__title">Live Bot Logs</h2>
       <div class="log" id="log"></div>
-      <div class="row logFooter">
-        <div class="muted small">Auto-stop target</div>
-        <div class="pill pill--red">+65%</div>
-      </div>
     </section>
 
     <footer class="footer">
-      <div class="muted small">panic is experimental · panic is a meme · not financial advice</div>
+      <div class="muted small">
+        panic is experimental · panic is a meme · not financial advice
+      </div>
     </footer>
 
   </main>
 
-  <!-- IMPORTANT: keep this path EXACT -->
   <script src="./js/app.js"></script>
 </body>
 </html>
