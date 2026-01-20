@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logBox) logBox.innerHTML = "[BOOT] app.js is running ✅";
 });
 
-
 // Panic Button — Wallet + Vault (USDC demo) + Demo Bot + Radar (100Hrs display)
 // Safe: no transactions, no real swaps. UI + simulated behavior only.
 
@@ -351,9 +350,7 @@ async function connectWallet() {
 
   if (!provider) {
     log("WALLET — no Solana wallet detected.", "bad");
-    alert(
-      "No Solana wallet detected.\n\nDesktop: Install Phantom extension.\nMobile: Open inside Phantom in-app browser."
-    );
+    alert("No Solana wallet detected.\n\nDesktop: Install Phantom.\nMobile: Open inside Phantom browser.");
     return;
   }
 
@@ -409,9 +406,6 @@ async function eagerConnectIfTrusted() {
 
 /* =========================
    RADAR — 100Hrs Panic Window (DISPLAY ONLY)
-   - renders ALL pairs
-   - sticky Best Pick header
-   - “Updated Xs ago”
 ========================= */
 (function RadarDisplayOnly(){
   const HOUR = 60 * 60 * 1000;
@@ -554,6 +548,14 @@ async function eagerConnectIfTrusted() {
     `;
   }
 
+  function updateAge(){
+    const a = $("radarAge");
+    if (!a) return;
+    if (!lastUpdatedTs) return (a.textContent = "Updated: —");
+    const sec = Math.max(0, Math.floor((Date.now() - lastUpdatedTs) / 1000));
+    a.textContent = `Updated: ${sec}s ago`;
+  }
+
   function setCount(n){
     const c = $("radarCount");
     if (c) c.textContent = `${n} pairs`;
@@ -562,14 +564,6 @@ async function eagerConnectIfTrusted() {
   function setMeta(text){
     const m = $("radarMeta");
     if (m) m.textContent = text;
-  }
-
-  function updateAge(){
-    const a = $("radarAge");
-    if (!a) return;
-    if (!lastUpdatedTs) return (a.textContent = "Updated: —");
-    const sec = Math.max(0, Math.floor((Date.now() - lastUpdatedTs) / 1000));
-    a.textContent = `Updated: ${sec}s ago`;
   }
 
   function render(items){
@@ -589,9 +583,7 @@ async function eagerConnectIfTrusted() {
     const top = items[0];
     if (best) best.textContent = `${top.name} (Panic ${top.panicLevel} — ${panicLabel(top.panicLevel)})`;
 
-    // ✅ SHOW ALL ITEMS (no slice)
-    if (list) list.innerHTML = items.map(rowHTML).join("");
-
+    if (list) list.innerHTML = items.map(rowHTML).join(""); // all items
     setCount(items.length);
     setMeta("USDC pairs first · volume + liquidity + momentum");
   }
@@ -641,7 +633,6 @@ async function eagerConnectIfTrusted() {
   async function refresh(userTriggered=false){
     if (!radarExists()) return;
 
-    // render cache immediately
     let cache = prune(loadCache());
     saveCache(cache);
     render(sortRadar(itemsFromCache(cache)));
@@ -710,4 +701,68 @@ async function eagerConnectIfTrusted() {
     if (!radarExists()) return;
 
     let cache = prune(loadCache());
-    saveCache(cache)
+    saveCache(cache);
+    render(sortRadar(itemsFromCache(cache)));
+
+    $("radarRefreshBtn")?.addEventListener("click", () => refresh(true));
+    $("radarClearBtn")?.addEventListener("click", clear);
+
+    refresh(false);
+
+    if (radarIntervalId) clearInterval(radarIntervalId);
+    radarIntervalId = setInterval(() => refresh(false), POLL_MS);
+
+    if (ageIntervalId) clearInterval(ageIntervalId);
+    ageIntervalId = setInterval(updateAge, 1000);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+
+// ---------- Boot ----------
+function boot() {
+  setDemoMode(true);
+  setWalletUIConnected(false);
+  setPanicLevel(0);
+  setVaultUI();
+
+  // cooldown slider
+  const slider = el("cooldown");
+  if (slider) {
+    const v = Number(slider.value || 90);
+    state.cooldownSec = v;
+    el("cooldownVal") && (el("cooldownVal").textContent = String(v));
+    slider.addEventListener("input", (e) => {
+      state.cooldownSec = Number(e.target.value);
+      el("cooldownVal") && (el("cooldownVal").textContent = String(state.cooldownSec));
+      if (state.running) { stopBot("cooldown changed — restarting"); startBot(); }
+    });
+  }
+
+  el("connectBtn")?.addEventListener("click", connectWallet);
+  el("connectBtn2")?.addEventListener("click", connectWallet);
+  el("disconnectBtn")?.addEventListener("click", disconnectWallet);
+
+  el("demoBtn")?.addEventListener("click", () => setDemoMode(true));
+
+  el("startBtn")?.addEventListener("click", startBot);
+  el("stopBtn")?.addEventListener("click", () => stopBot("Stopped by user"));
+  el("panicBtn")?.addEventListener("click", panic);
+
+  el("depositBtn")?.addEventListener("click", depositUSDC);
+  el("withdrawBtn")?.addEventListener("click", withdrawUSDC);
+  el("maxDepositBtn")?.addEventListener("click", () => {
+    const rem = maxDepositRemaining();
+    setDepositInput(rem);
+    log(`VAULT — max remaining set to ${money(rem)}`, "hot");
+  });
+
+  enableCopyAddress();
+
+  log("BOOT — connect wallet → deposit up to $10 → START. PANIC halts everything.", "hot");
+  eagerConnectIfTrusted();
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
