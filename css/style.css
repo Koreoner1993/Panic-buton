@@ -416,3 +416,35 @@ body{
     inset 0 6px 0 rgba(255,255,255,.12),
     0 0 32px rgba(255,27,27,.55);
 }
+/* =========================
+   HEADER SIZE TUNING
+   (banner + panic button)
+========================= */
+
+/* Banner in header — smaller + cleaner */
+.topbarBanner img{
+  height: 44px;          /* was too tall */
+  width: auto;
+  object-fit: contain;
+  opacity: .95;
+}
+
+/* Panic button in header — slightly smaller */
+.panicBtn--header{
+  transform: scale(0.85);
+  transform-origin: center;
+}
+
+/* Keep text aligned nicely next to smaller button */
+.panicHeaderWrap{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panicHint{
+  font-size: 12px;
+  opacity: .75;
+  max-width: 140px;
+  line-height: 1.2;
+}
