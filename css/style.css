@@ -1,160 +1,72 @@
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:Inter,system-ui,sans-serif;
+/* --- existing styles assumed above this line --- */
+
+/* =========================
+   RADAR SCROLL (SHOW ~7 ITEMS)
+========================= */
+
+.radarList{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  /* 👇 this is the KEY */
+  max-height: 420px;          /* ~7 rows */
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
-.container{
-  max-width:1100px;
-  margin:0 auto;
-  padding:16px;
+/* nicer scrollbar */
+.radarList::-webkit-scrollbar{
+  width: 6px;
+}
+.radarList::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.2);
+  border-radius: 6px;
 }
 
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-  background:rgba(0,0,0,.9);
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-
-.topbar__inner{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 16px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.brand__logo{
-  width:24px;
-  height:24px;
-  border-radius:50%;
-}
-
-.links{
-  display:flex;
-  gap:10px;
-}
-
-.link{
-  color:#fff;
-  text-decoration:none;
-  font-size:13px;
-}
-
-.hero{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  margin-top:16px;
-}
-
-.hero__right{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-}
-
-.bannerFrame img{
-  width:100%;
-  border-radius:12px;
-}
-
-.panicLogoStand img{
-  width:64px;
-  height:64px;
-}
-
-.panicBtn{
-  width:150px;
-  height:150px;
-  border-radius:50%;
-  background:none;
-  border:none;
-  position:relative;
-}
-
-.panicBtn__ring{
-  position:absolute;
-  inset:0;
-  border:5px solid #ffcc33;
-  border-radius:50%;
-}
-
-.panicBtn__cap{
-  position:absolute;
-  inset:18px;
-  border-radius:50%;
-  background:#ff1b1b;
-}
-
-.panicBtn__text{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-}
+/* =========================
+   DESKTOP GRID LOCK
+========================= */
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-top:16px;
-}
-
-.card{
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:14px;
-  padding:14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap:16px;
 }
 
 .logsFull,
 .radarFull{
+  grid-column: 1 / -1;
   margin-top:16px;
 }
 
+/* =========================
+   MOBILE FIXES
+========================= */
+
+@media (max-width: 768px){
+
+  .grid{
+    grid-template-columns: 1fr;
+  }
+
+  /* panic button shrink */
+  .panicBtn{
+    transform: scale(0.78);
+    transform-origin: top center;
+  }
+
+  /* radar shorter on phones */
+  .radarList{
+    max-height: 300px;
+  }
+}
+
+/* =========================
+   LOG HEIGHT CONTROL
+========================= */
+
 .log{
-  height:180px;
-  overflow:auto;
-  background:#050505;
-  padding:10px;
-  font-size:12px;
-}
-
-.radarFull{
-  display:flex;
-  flex-direction:column;
-}
-
-.radarSticky{
-  padding:10px;
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-
-.radarScroll{
-  max-height:320px;
-  overflow-y:auto;
-}
-
-.radarList{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr}
-  .grid{grid-template-columns:1fr}
-  .radarScroll{max-height:260px}
+  max-height: 220px;
+  overflow-y: auto;
 }
