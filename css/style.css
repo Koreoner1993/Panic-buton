@@ -448,35 +448,37 @@ body{
   max-width: 140px;
   line-height: 1.2;
 }
+
 /* =========================
-   HEADER SIZE TUNING
-   (banner + panic button)
+   HEADER SIZE ADJUST (FINAL)
+   Normal banner + tuned panic
 ========================= */
 
-/* Banner in header — smaller + cleaner */
+/* Banner — back to normal size */
 .topbarBanner img{
-  height: 44px;          /* was too tall */
+  height: 56px;          /* normal, not tiny */
   width: auto;
   object-fit: contain;
   opacity: .95;
 }
 
-/* Panic button in header — slightly smaller */
+/* Panic button — slightly reduced (3 points down) */
 .panicBtn--header{
-  transform: scale(0.85);
+  transform: scale(0.92);   /* was too small before */
   transform-origin: center;
 }
 
-/* Keep text aligned nicely next to smaller button */
+/* Header alignment stays clean */
 .panicHeaderWrap{
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* Hint text next to panic button */
 .panicHint{
-  font-size: 12px;
-  opacity: .75;
-  max-width: 140px;
-  line-height: 1.2;
+  font-size: 12.5px;
+  opacity: .8;
+  max-width: 160px;
+  line-height: 1.25;
 }
