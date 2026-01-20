@@ -1,3 +1,11 @@
+console.log("✅ app.js loaded");
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logBox = document.getElementById("log");
+  if (logBox) logBox.innerHTML = "[BOOT] app.js is running ✅";
+});
+
+
 // Panic Button — Wallet + Vault (USDC demo) + Demo Bot + Radar (100Hrs display)
 // Safe: no transactions, no real swaps. UI + simulated behavior only.
 
