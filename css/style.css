@@ -311,3 +311,108 @@ body{
   font-weight:900;
   font-size:14px;
 }
+/* =========================
+   COLOR RESTORE PATCH
+   (restores original Panic Button look & site glow)
+   ========================= */
+
+/* Restore background depth */
+body{
+  background:
+    radial-gradient(1100px 500px at 35% 10%, rgba(255,30,30,.22), transparent 60%),
+    radial-gradient(900px 450px at 70% 18%, rgba(255,120,0,.12), transparent 60%),
+    radial-gradient(1200px 600px at 50% 120%, rgba(255,30,30,.16), transparent 60%),
+    var(--bg);
+}
+
+/* Restore card glow */
+.card,
+.hero__right{
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.05),
+    rgba(255,255,255,.015)
+  );
+  box-shadow:
+    0 18px 60px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* Restore banner glow */
+.bannerGlow{
+  background: radial-gradient(
+    circle at 70% 40%,
+    rgba(255,27,27,.35),
+    transparent 55%
+  );
+}
+
+/* Restore PANIC button colors */
+.panicBtn__cap{
+  background: radial-gradient(
+    circle at 30% 25%,
+    #ff7a7a,
+    var(--red2) 70%
+  );
+  box-shadow:
+    inset 0 10px 0 rgba(255,255,255,.14),
+    0 0 70px rgba(255,27,27,.55);
+}
+
+.panicBtn__ring{
+  border-color: rgba(255,204,51,1);
+  box-shadow:
+    0 0 60px rgba(255,27,27,.65),
+    inset 0 0 0 rgba(0,0,0,0);
+}
+
+/* Hot panic pulse stronger */
+.panicBtn.is-hot .panicBtn__cap{
+  animation: panicPulse 1s ease-in-out infinite;
+  filter: brightness(1.12);
+}
+
+.panicBtn.is-hot .panicBtn__ring{
+  box-shadow: 0 0 90px rgba(255,27,27,.85);
+}
+
+/* Restore pill colors */
+.pill--red,
+.panicLevel{
+  background: rgba(255,27,27,.18);
+  border-color: rgba(255,27,27,.55);
+  box-shadow: 0 0 18px rgba(255,27,27,.25);
+}
+
+/* Restore radar panic colors */
+.panic3{
+  border-color: rgba(255,27,27,.55);
+  background: rgba(255,27,27,.14);
+}
+.panic4{
+  border-color: rgba(255,27,27,.85);
+  background: rgba(255,27,27,.22);
+  box-shadow: 0 0 30px rgba(255,27,27,.45);
+}
+
+/* Restore buttons */
+.btn--primary{
+  background: linear-gradient(180deg, var(--red), var(--red2));
+  box-shadow:
+    0 12px 40px rgba(255,27,27,.35),
+    inset 0 1px 0 rgba(255,255,255,.15);
+}
+
+.btn--ghost:hover,
+.btn--dim:hover{
+  background: rgba(255,27,27,.12);
+  border-color: rgba(255,27,27,.35);
+}
+
+/* Header panic button color restore */
+.panicBtn--top .panicBtn__cap{
+  background: radial-gradient(circle at 30% 25%, #ff6a6a, var(--red2) 70%);
+  box-shadow:
+    inset 0 6px 0 rgba(255,255,255,.12),
+    0 0 32px rgba(255,27,27,.55);
+}
