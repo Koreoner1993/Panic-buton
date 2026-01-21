@@ -692,3 +692,57 @@ body{
   background: linear-gradient(180deg, rgba(255,27,27,.06), rgba(255,255,255,.01));
   box-shadow: 0 0 0 1px rgba(255,27,27,.08), 0 18px 60px rgba(0,0,0,.65);
 }
+
+/* ===== RADAR rows become clickable boxed items ===== */
+.radarRowLink{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  border-radius:14px; /* so hover glow matches */
+}
+
+.radarRow{
+  display:grid;
+  grid-template-columns: 1.2fr .7fr;
+  gap:10px;
+  align-items:center;
+
+  padding:12px 14px;
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+
+  transition: transform .08s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.radarRowLink:hover .radarRow{
+  border-color: rgba(255,27,27,.35);
+  background: rgba(255,27,27,.06);
+  box-shadow: 0 0 0 1px rgba(255,27,27,.18), 0 14px 40px rgba(0,0,0,.45);
+  transform: translateY(-1px);
+}
+
+.radarRowLink:active .radarRow{
+  transform: scale(.99);
+}
+
+.radarRow__right{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  align-items:center;
+}
+
+.radarChevron{
+  opacity:.65;
+  font-weight:1000;
+  font-size:13px;
+}
+
+/* (optional) make scroll always obvious */
+.radarScroll{
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
