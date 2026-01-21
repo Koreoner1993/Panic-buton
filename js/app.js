@@ -140,27 +140,45 @@ function stopBot(reason = "Stopped") {
   state.activeTrade = false;
   log(`STOP — ${reason}`, "bad");
 }
-
 function startBot() {
-  if (state.running) return;
+  // HARD reset
+  if (state.timer) clearInterval(state.timer);
 
+  state.running = false;
+  state.halted = false;
+  state.activeTrade = false;
+
+  // Validate vault
   if (state.vaultUSDC < state.tradeSizeUSDC) {
     log(`BOT — need at least ${money(state.tradeSizeUSDC)} in vault to trade.`, "bad");
     return;
   }
 
-  state.halted = false;
+  // Reset panic button visuals
   const btn = el("panicBtn");
   if (btn) {
     btn.classList.remove("is-cooled");
     btn.classList.remove("is-hot");
   }
 
+  // Ensure cooldown is set
+  const slider = el("cooldown");
+  if (slider) {
+    state.cooldownSec = Number(slider.value || 90);
+    el("cooldownVal") && (el("cooldownVal").textContent = state.cooldownSec);
+  }
+
   state.running = true;
+
   log(`START — bot running (cooldown ${state.cooldownSec}s)`, "ok");
 
+  // 🔥 Run immediately
   tick();
-  state.timer = setInterval(tick, state.cooldownSec * 1000);
+
+  // 🔁 Then schedule future ticks
+  state.timer = setInterval(() => {
+    tick();
+  }, state.cooldownSec * 1000);
 }
 
 function randomToken() {
