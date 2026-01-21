@@ -7,17 +7,19 @@
 
   <meta name="theme-color" content="#000000" />
   <link rel="icon" type="image/png" href="./assets/panic-logo.png">
-  <link rel="stylesheet" href="./css/style.css" />
+
+  <!-- IMPORTANT: cache buster so CSS updates actually apply -->
+  <link rel="stylesheet" href="./css/style.css?v=101" />
 </head>
 
 <body>
   <div class="bg-grain" aria-hidden="true"></div>
 
-  <!-- STICKY TOP BAR -->
+  <!-- ================= STICKY HEADER ================= -->
   <header class="topbar">
     <div class="topbar__inner">
 
-      <!-- LEFT: LOGO -->
+      <!-- LEFT: BRAND -->
       <div class="brand">
         <img src="./assets/panic-logo.png" alt="Panic Logo" class="brand__logo" />
         <div class="brand__text">
@@ -31,11 +33,11 @@
         <img src="./assets/panic-banner.png" alt="Panic Banner" />
       </div>
 
-      <!-- RIGHT: PANIC BUTTON + TEXT + LINKS -->
+      <!-- RIGHT: PANIC + LINKS -->
       <div class="topbarActions">
 
         <div class="panicHeaderWrap">
-          <button class="panicBtn panicBtn--header" id="panicBtn" type="button">
+          <button class="panicBtn panicBtn--header" id="panicBtn" type="button" aria-label="Panic">
             <span class="panicBtn__ring"></span>
             <span class="panicBtn__cap"></span>
             <span class="panicBtn__text">PANIC</span>
@@ -58,8 +60,8 @@
 
     </div>
   </header>
+  <!-- ================= /STICKY HEADER ================= -->
 
-  <!-- MAIN CONTENT -->
   <main class="container">
 
     <!-- HERO -->
@@ -84,16 +86,12 @@
         </div>
 
         <p class="fineprint">
-          Beta rules:
-          <b>$10 max deposit</b>,
-          <b>$1 per trade</b>,
-          <b>one trade</b>,
-          <b>auto-stop +65%</b>.
+          <b>$10 max deposit</b> · <b>$1 per trade</b> · <b>one trade</b> · <b>auto-stop +65%</b>
         </p>
       </div>
 
       <div class="hero__right">
-        <div class="hint">Logs + radar below. Panic anytime.</div>
+        <div class="hint">Scroll logs, watch radar, panic anytime.</div>
       </div>
     </section>
 
@@ -103,22 +101,26 @@
       <!-- WALLET -->
       <div class="card">
         <h2 class="card__title">Wallet</h2>
+
         <div class="row">
           <div class="kv">
             <div class="k">Address</div>
             <div class="v mono" id="addrText">—</div>
           </div>
         </div>
+
         <div class="row btnRow">
           <button class="btn btn--primary" id="connectBtn2">Connect</button>
           <button class="btn btn--dim" id="disconnectBtn">Disconnect</button>
         </div>
+
         <div class="row small muted" id="networkStatus">Network: —</div>
       </div>
 
       <!-- VAULT -->
       <div class="card">
         <h2 class="card__title">Vault (USDC)</h2>
+
         <div class="row">
           <div class="kv">
             <div class="k">Balance</div>
@@ -129,7 +131,7 @@
         <div class="row">
           <div class="inputRow">
             <span class="inputPrefix">$</span>
-            <input id="depositAmt" class="input" type="number" step="0.01" placeholder="1.00">
+            <input id="depositAmt" class="input" type="number" step="0.01" placeholder="1.00" />
             <button class="btn btn--ghost btn--mini" id="maxDepositBtn">MAX</button>
           </div>
         </div>
@@ -153,7 +155,7 @@
 
         <div class="row">
           <label class="label">Cooldown</label>
-          <input id="cooldown" type="range" min="30" max="180" value="90">
+          <input id="cooldown" type="range" min="30" max="180" value="90" />
           <div class="muted small"><span id="cooldownVal">90</span>s</div>
         </div>
 
@@ -162,6 +164,7 @@
           <button class="btn btn--dim" id="stopBtn">Stop</button>
         </div>
       </div>
+
     </section>
 
     <!-- LOGS -->
@@ -190,7 +193,9 @@
     </section>
 
     <footer class="footer">
-      <div class="muted small">panic is experimental · panic is a meme · not financial advice</div>
+      <div class="muted small">
+        panic is experimental · panic is a meme · not financial advice
+      </div>
     </footer>
 
   </main>
