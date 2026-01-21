@@ -276,7 +276,7 @@ body{
 }
 
 /* Radar rows (if your JS injects these classes) */
-.radarList{
+.radarList{ text-allin: center; }
   display:flex;
   flex-direction:column;
   gap:10px;
