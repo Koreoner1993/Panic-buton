@@ -311,438 +311,69 @@ body{
   font-weight:900;
   font-size:14px;
 }
+
 /* =========================
-   COLOR RESTORE PATCH
-   (restores original Panic Button look & site glow)
+   FINAL OVERRIDES (KEEP LAST)
    ========================= */
 
-/* Restore background depth */
-body{
-  background:
-    radial-gradient(1100px 500px at 35% 10%, rgba(255,30,30,.22), transparent 60%),
-    radial-gradient(900px 450px at 70% 18%, rgba(255,120,0,.12), transparent 60%),
-    radial-gradient(1200px 600px at 50% 120%, rgba(255,30,30,.16), transparent 60%),
-    var(--bg);
-}
-
-/* Restore card glow */
-.card,
-.hero__right{
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,.05),
-    rgba(255,255,255,.015)
-  );
-  box-shadow:
-    0 18px 60px rgba(0,0,0,.75),
-    inset 0 1px 0 rgba(255,255,255,.05);
-}
-
-/* Restore banner glow */
-.bannerGlow{
-  background: radial-gradient(
-    circle at 70% 40%,
-    rgba(255,27,27,.35),
-    transparent 55%
-  );
-}
-
-/* Restore PANIC button colors */
-.panicBtn__cap{
-  background: radial-gradient(
-    circle at 30% 25%,
-    #ff7a7a,
-    var(--red2) 70%
-  );
-  box-shadow:
-    inset 0 10px 0 rgba(255,255,255,.14),
-    0 0 70px rgba(255,27,27,.55);
-}
-
-.panicBtn__ring{
-  border-color: rgba(255,204,51,1);
-  box-shadow:
-    0 0 60px rgba(255,27,27,.65),
-    inset 0 0 0 rgba(0,0,0,0);
-}
-
-/* Hot panic pulse stronger */
-.panicBtn.is-hot .panicBtn__cap{
-  animation: panicPulse 1s ease-in-out infinite;
-  filter: brightness(1.12);
-}
-
-.panicBtn.is-hot .panicBtn__ring{
-  box-shadow: 0 0 90px rgba(255,27,27,.85);
-}
-
-/* Restore pill colors */
-.pill--red,
-.panicLevel{
-  background: rgba(255,27,27,.18);
-  border-color: rgba(255,27,27,.55);
-  box-shadow: 0 0 18px rgba(255,27,27,.25);
-}
-
-/* Restore radar panic colors */
-.panic3{
-  border-color: rgba(255,27,27,.55);
-  background: rgba(255,27,27,.14);
-}
-.panic4{
-  border-color: rgba(255,27,27,.85);
-  background: rgba(255,27,27,.22);
-  box-shadow: 0 0 30px rgba(255,27,27,.45);
-}
-
-/* Restore buttons */
-.btn--primary{
-  background: linear-gradient(180deg, var(--red), var(--red2));
-  box-shadow:
-    0 12px 40px rgba(255,27,27,.35),
-    inset 0 1px 0 rgba(255,255,255,.15);
-}
-
-.btn--ghost:hover,
-.btn--dim:hover{
-  background: rgba(255,27,27,.12);
-  border-color: rgba(255,27,27,.35);
-}
-
-/* Header panic button color restore */
-.panicBtn--top .panicBtn__cap{
-  background: radial-gradient(circle at 30% 25%, #ff6a6a, var(--red2) 70%);
-  box-shadow:
-    inset 0 6px 0 rgba(255,255,255,.12),
-    0 0 32px rgba(255,27,27,.55);
-}
-/* =========================
-   HEADER SIZE TUNING
-   (banner + panic button)
-========================= */
-
-/* Banner in header — smaller + cleaner */
-.topbarBanner img{
-  height: 44px;          /* was too tall */
-  width: auto;
-  object-fit: contain;
-  opacity: .95;
-}
-
-/* Panic button in header — slightly smaller */
-.panicBtn--header{
-  transform: scale(0.85);
-  transform-origin: center;
-}
-
-/* Keep text aligned nicely next to smaller button */
-.panicHeaderWrap{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.panicHint{
-  font-size: 12px;
-  opacity: .75;
-  max-width: 140px;
-  line-height: 1.2;
-}
-
-/* =========================
-   HEADER SIZE ADJUST (FINAL)
-   Normal banner + tuned panic
-========================= */
-
-/* Banner — back to normal size */
-.topbarBanner img{
-  height: 56px;          /* normal, not tiny */
-  width: auto;
-  object-fit: contain;
-  opacity: .95;
-}
-
-/* Panic button — slightly reduced (3 points down) */
-.panicBtn--header{
-  transform: scale(0.92);   /* was too small before */
-  transform-origin: center;
-}
-
-/* Header alignment stays clean */
-.panicHeaderWrap{
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Hint text next to panic button */
-.panicHint{
-  font-size: 12.5px;
-  opacity: .8;
-  max-width: 160px;
-  line-height: 1.25;
-}
-
-/* =========================
-   FINAL SIZE TUNE (WORKING)
-   Uses EXISTING classes only
-========================= */
-
-/* Banner slightly smaller (but still visible) */
-.bannerFrame{
-  max-height: 140px;
-}
-
-.bannerImg{
-  height: 140px;
-  object-fit: cover;
-}
-
-/* Panic button — slightly smaller, not tiny */
-.panicBtn{
-  width: 170px;      /* was 190 */
-  height: 170px;
-}
-
-/* Inner cap scales automatically */
-.panicBtn__cap{
-  width: 135px;      /* was 150 */
-  height: 135px;
-}
-
-/* Bring panic button down visually a bit */
-.hero__right{
-  padding-top: 18px;
-}
-
-/* =========================
-   FINAL SIZE CORRECTION
-   Banner smaller, Panic slightly smaller
-========================= */
-
-/* Banner — smaller */
-.bannerFrame{
-  max-height: 130px !important;
-}
-
-.bannerImg{
-  height: 130px !important;
-  object-fit: cover !important;
-}
-
-/* Panic Button — ACTUALLY smaller */
-.panicBtn{
-  width: 160px !important;
-  height: 160px !important;
-  transform: none !important;   /* ⬅️ THIS IS THE KEY */
-}
-
-.panicBtn__cap{
-  width: 125px !important;
-  height: 125px !important;
-}
-
-/* Keep spacing clean */
-.hero__right{
-  padding-top: 14px !important;
-}
-/* =========================
-   STICKY HEADER — SIZE FIX
-   (banner bigger, panic smaller)
-========================= */
-
-/* Header layout breathing room */
+/* Header layout */
 .topbar__inner{
-  align-items: center;
-  gap: 18px;
+  align-items:center;
+  gap:14px;
 }
 
-/* ---------- BANNER (make it visible + bigger) ---------- */
+/* Banner in sticky header: normal size */
 .topbarBanner{
-  flex: 1;
-  display: flex;
-  justify-content: center;
+  flex:1;
+  display:flex;
+  justify-content:center;
 }
-
 .topbarBanner img{
-  height: 52px;            /* ⬅️ INCREASE this if you want bigger */
-  max-width: 100%;
-  object-fit: contain;
-  opacity: .95;
+  height:56px;
+  width:auto;
+  max-width:100%;
+  object-fit:contain;
+  opacity:.95;
 }
 
-/* ---------- PANIC BUTTON (header version only) ---------- */
-.panicBtn--header{
-  width: 92px;             /* ⬅️ smaller than hero version */
-  height: 92px;
-}
-
-.panicBtn--header .panicBtn__ring{
-  border-width: 4px;
-}
-
-.panicBtn--header .panicBtn__cap{
-  width: 68px;
-  height: 68px;
-}
-
-.panicBtn--header .panicBtn__text{
-  font-size: 10px;
-  letter-spacing: .14em;
-}
-
-/* Optional: keep header compact */
-.topbar{
-  padding: 0;
-}
-
-/* =========================
-   PANIC BUTTON — HEADER SIZE FIX
-   (sticky header version)
-========================= */
-
-.panicBtn--header{
-  width: 96px;
-  height: 96px;
-}
-
-.panicBtn--header .panicBtn__ring{
-  border-width: 4px;
-}
-
-.panicBtn--header .panicBtn__cap{
-  width: 72px;
-  height: 72px;
-}
-
-.panicBtn--header .panicBtn__text{
-  font-size: 10px;
-  letter-spacing: .14em;
-}
-
-/* =========================
-   FORCE HEADER PANIC SMALL
-   (sticky header only)
-========================= */
-
-/* target the panic button ONLY inside the sticky header */
+/* Panic button in sticky header: smaller (header only) */
 .topbar .panicBtn#panicBtn{
-  width: 78px !important;
-  height: 78px !important;
-  transform: none !important;     /* kills any previous scale() */
-  margin: 0 !important;
+  width:78px;
+  height:78px;
+  margin:0;
+  transform:none;
 }
-
-/* scale the inner pieces so it looks correct */
-.topbar .panicBtn#panicBtn .panicBtn__ring{
-  border-width: 3px !important;
-}
-
-.topbar .panicBtn#panicBtn .panicBtn__cap{
-  width: 56px !important;
-  height: 56px !important;
-}
-
+.topbar .panicBtn#panicBtn .panicBtn__ring{ border-width:3px; }
+.topbar .panicBtn#panicBtn .panicBtn__cap{ width:56px; height:56px; }
 .topbar .panicBtn#panicBtn .panicBtn__text{
-  font-size: 9px !important;
-  letter-spacing: .14em !important;
+  font-size:9px;
+  letter-spacing:.14em;
 }
 
-/* =========================
-   GLOBAL UI POLISH (CARDS)
-   subtle hover glow, degen-clean
-========================= */
-
-.card{
-  transition: transform .12s ease, border-color .20s ease, background .20s ease, box-shadow .20s ease;
+/* Radar: show ~7 rows then scroll */
+.radarScroll{
+  max-height:360px;      /* ~7 items */
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:10px;
+  -webkit-overflow-scrolling:touch;
 }
 
-.card:hover{
-  transform: translateY(-1px);
-  border-color: rgba(255,27,27,.18);
-  background: linear-gradient(180deg, rgba(255,27,27,.06), rgba(255,255,255,.01));
-  box-shadow: 0 0 0 1px rgba(255,27,27,.08), 0 18px 60px rgba(0,0,0,.65);
-}
-
-/* Buttons feel a bit more “alive” */
-.btn:hover{
-  filter: brightness(1.04);
-}
-
-/* Inputs pop a tiny bit on focus */
-.input:focus{
-  outline: none;
-}
-.inputRow:focus-within{
-  border-color: rgba(255,27,27,.28);
-  box-shadow: 0 0 0 1px rgba(255,27,27,.12);
-}
-
-/* =========================
-   GLOBAL CARD POLISH (SUBTLE)
-========================= */
-
-.card{
-  transition: transform .12s ease, border-color .20s ease, background .20s ease, box-shadow .20s ease;
-}
-
-.card:hover{
-  transform: translateY(-1px);
-  border-color: rgba(255,27,27,.18);
-  background: linear-gradient(180deg, rgba(255,27,27,.06), rgba(255,255,255,.01));
-  box-shadow: 0 0 0 1px rgba(255,27,27,.08), 0 18px 60px rgba(0,0,0,.65);
-}
-
-/* ===== RADAR rows become clickable boxed items ===== */
+/* Clickable boxed Radar rows (when JS wraps rows in .radarRowLink) */
 .radarRowLink{
   display:block;
   text-decoration:none;
   color:inherit;
-  border-radius:14px; /* so hover glow matches */
-}
-
-.radarRow{
-  display:grid;
-  grid-template-columns: 1.2fr .7fr;
-  gap:10px;
-  align-items:center;
-
-  padding:12px 14px;
   border-radius:14px;
-
+}
+.radarRow{
   border:1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.03);
-
   transition: transform .08s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
 }
-
 .radarRowLink:hover .radarRow{
   border-color: rgba(255,27,27,.35);
   background: rgba(255,27,27,.06);
   box-shadow: 0 0 0 1px rgba(255,27,27,.18), 0 14px 40px rgba(0,0,0,.45);
   transform: translateY(-1px);
-}
-
-.radarRowLink:active .radarRow{
-  transform: scale(.99);
-}
-
-.radarRow__right{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  align-items:center;
-}
-
-.radarChevron{
-  opacity:.65;
-  font-weight:1000;
-  font-size:13px;
-}
-
-/* (optional) make scroll always obvious */
-.radarScroll{
-  max-height: 360px;
-  overflow-y: auto;
-  padding-right: 10px;
 }
