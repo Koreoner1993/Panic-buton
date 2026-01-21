@@ -619,3 +619,31 @@ body{
   font-size: 10px;
   letter-spacing: .14em;
 }
+
+/* =========================
+   FORCE HEADER PANIC SMALL
+   (sticky header only)
+========================= */
+
+/* target the panic button ONLY inside the sticky header */
+.topbar .panicBtn#panicBtn{
+  width: 78px !important;
+  height: 78px !important;
+  transform: none !important;     /* kills any previous scale() */
+  margin: 0 !important;
+}
+
+/* scale the inner pieces so it looks correct */
+.topbar .panicBtn#panicBtn .panicBtn__ring{
+  border-width: 3px !important;
+}
+
+.topbar .panicBtn#panicBtn .panicBtn__cap{
+  width: 56px !important;
+  height: 56px !important;
+}
+
+.topbar .panicBtn#panicBtn .panicBtn__text{
+  font-size: 9px !important;
+  letter-spacing: .14em !important;
+}
