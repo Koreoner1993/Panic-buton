@@ -377,3 +377,90 @@ body{
   box-shadow: 0 0 0 1px rgba(255,27,27,.18), 0 14px 40px rgba(0,0,0,.45);
   transform: translateY(-1px);
 }
+
+/* =========================
+   RADAR — DEGEN BOX ROWS
+   whole row clickable
+   no dead space on right
+========================= */
+
+/* Whole row becomes the link */
+.radarRowLink{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  border-radius:14px;
+}
+
+/* The actual row box */
+.radarRow{
+  display:grid;
+  grid-template-columns: 1fr auto;  /* ✅ fixes the giant right-side gap */
+  gap:12px;
+  align-items:center;
+
+  padding:12px 14px;
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+
+  transition: transform .10s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+/* Hover glow */
+.radarRowLink:hover .radarRow{
+  border-color: rgba(255,27,27,.35);
+  background: rgba(255,27,27,.07);
+  box-shadow: 0 0 0 1px rgba(255,27,27,.18), 0 14px 40px rgba(0,0,0,.45);
+  transform: translateY(-1px);
+}
+
+.radarRowLink:active .radarRow{
+  transform: scale(.99);
+}
+
+/* Left side: let it breathe (less squish) */
+.radarRow__left{
+  min-width:0;
+  padding-right: 6px;
+}
+
+.radarName{
+  font-weight:1000;
+  letter-spacing:.01em;
+}
+
+/* Meta tighter + nicer */
+.radarMeta{
+  font-size:12px;
+  color: rgba(255,255,255,.72);
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+/* Right side compact */
+.radarRow__right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  justify-content:flex-end;
+  white-space:nowrap;
+}
+
+/* Tiny “go” icon */
+.radarChevron{
+  opacity:.7;
+  font-weight:1000;
+  font-size:13px;
+}
+
+/* Optional: make scrollbars look cleaner */
+.radarScroll{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,27,27,.35) rgba(255,255,255,.06);
+}
+.radarScroll::-webkit-scrollbar{ width: 10px; }
+.radarScroll::-webkit-scrollbar-track{ background: rgba(255,255,255,.06); border-radius: 999px; }
+.radarScroll::-webkit-scrollbar-thumb{ background: rgba(255,27,27,.35); border-radius: 999px; }
