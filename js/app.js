@@ -533,20 +533,26 @@ async function eagerConnectIfTrusted() {
   }
 
   function rowHTML(it){
-    const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
-    return `
+  const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
+
+  return `
+    <a class="radarRowLink" href="${escapeHtml(it.url)}" target="_blank" rel="noreferrer">
       <div class="radarRow">
         <div class="radarRow__left">
           <div class="radarName">${escapeHtml(it.name)}</div>
           <div class="radarMeta">${escapeHtml(meta)}</div>
         </div>
+
         <div class="radarRow__right">
-          <span class="panicBadge panic${it.panicLevel}" title="${escapeHtml(panicLabel(it.panicLevel))}">${it.panicLevel}</span>
-          <a class="radarBtnLink" href="${escapeHtml(it.url)}" target="_blank" rel="noreferrer">View</a>
+          <span class="panicBadge panic${it.panicLevel}" title="${escapeHtml(panicLabel(it.panicLevel))}">
+            ${it.panicLevel}
+          </span>
+          <span class="radarChevron">↗</span>
         </div>
       </div>
-    `;
-  }
+    </a>
+  `;
+}
 
   function updateAge(){
     const a = $("radarAge");
