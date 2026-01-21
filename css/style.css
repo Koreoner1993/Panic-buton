@@ -677,3 +677,18 @@ body{
   border-color: rgba(255,27,27,.28);
   box-shadow: 0 0 0 1px rgba(255,27,27,.12);
 }
+
+/* =========================
+   GLOBAL CARD POLISH (SUBTLE)
+========================= */
+
+.card{
+  transition: transform .12s ease, border-color .20s ease, background .20s ease, box-shadow .20s ease;
+}
+
+.card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,27,27,.18);
+  background: linear-gradient(180deg, rgba(255,27,27,.06), rgba(255,255,255,.01));
+  box-shadow: 0 0 0 1px rgba(255,27,27,.08), 0 18px 60px rgba(0,0,0,.65);
+}
