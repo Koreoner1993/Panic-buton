@@ -550,7 +550,8 @@ async function eagerConnectIfTrusted() {
       .replace(/'/g,"&#039;");
   }
 
-function rowHTML(it){
+
+ function rowHTML(it){
   const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
 
   return `
@@ -571,6 +572,7 @@ function rowHTML(it){
     </a>
   `;
 }
+
   function updateAge(){
     const a = $("radarAge");
     if (!a) return;
