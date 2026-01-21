@@ -550,11 +550,11 @@ async function eagerConnectIfTrusted() {
       .replace(/'/g,"&#039;");
   }
 
-  function rowHTML(it){
+function rowHTML(it){
   const meta = `liq ${compactUsd(it.liquidityUsd)} · vol24 ${compactUsd(it.volume24h)} · 1h ${pct(it.change1h)}`;
 
   return `
-    <a class="radarRowLink" href="${escapeHtml(it.url)}" target="_blank" rel="noreferrer">
+    <a class="radarRowLink" href="${escapeHtml(it.url)}" target="_blank" rel="noreferrer" title="Open on DexScreener">
       <div class="radarRow">
         <div class="radarRow__left">
           <div class="radarName">${escapeHtml(it.name)}</div>
@@ -571,7 +571,6 @@ async function eagerConnectIfTrusted() {
     </a>
   `;
 }
-
   function updateAge(){
     const a = $("radarAge");
     if (!a) return;
