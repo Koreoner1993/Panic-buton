@@ -245,6 +245,7 @@ function tick() {
   }
 }
 
+
 function panic() {
   stopBot("PANIC BUTTON PRESSED — rugged yourself.");
   state.halted = true;
