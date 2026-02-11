@@ -464,3 +464,7 @@ body{
 .radarScroll::-webkit-scrollbar{ width: 10px; }
 .radarScroll::-webkit-scrollbar-track{ background: rgba(255,255,255,.06); border-radius: 999px; }
 .radarScroll::-webkit-scrollbar-thumb{ background: rgba(255,27,27,.35); border-radius: 999px; }
+
+.log .pnl-neg { color: #c77dff; } /* purple loss */
+
+
